@@ -1,0 +1,100 @@
+%%%%%
+
+
+%% CURRENT WORK
+
+%% the tool
+We have implemented liquidHaskell, a tool that takes as input
+a target Haskell source file, with the desired refinement types specified as a special
+form of comment annotation,
+After analyzing the program, liquidHaskell returns as output:
+-- Either SAFE, indicating that all the specifications indeed verify, or UNSAFE, indicating there are refinement type errors, together with the positions in the source
+code where type checking fails (e.g., functions that do not satisfy their signatures,
+or callsites where the inputs don't conform to the specifications).
+-- An HTML file containing the program source code annotated with inferred refinement types for all sub-expressions in the program. The inferred refinement type for
+each program expression is the strongest possible type over the given set of logical qualifiers. When a type error is reported,  it is highlighted with red color, and the programmer can use the inferred
+types to determine why their program does not typecheck: they can examine what
+properties liquidHaskell can deduce about various program expressions and 
+provide stronger specification or alter the program as necessary so that it typechecks.
+
+%% Specifications
+The core of liquidHaskell performs liquid type inference and checking as described in [PLDI 2008].
+Specifications are expressed using refinement types, ie. types annotated with predicates
+As an example, type {v : Int | v > 0} describes a value v which is an integer and the refinements specifies that this value is greater than zero.
+The language of the predicates, contains logical formulas, linear arithmetic and uninterpreted functions. Moreover, the user can define ``measures'' on haskell data types, for example, he can define a measure ``len'' that captures the length of a list and use it on the specifications 
+
+
+%% what is new
+When implementing liquid types for haskell we had to consider haskell-specific features that lead to unsoundeness,
+specifically type class constraints and laziness.
+
+% Type class constraints 
+To keep both precision and soundness in the presence of type class constraints, 
+we came up with Abstract Refinement Types that allows a type to be parameterized over its refinements.
+As an example, we refine the type of a max function as
+
+max :: forall a <p :: a -> Prop>. Ord a => {v:a | p v} -> {v:a | p v} -> {v:a | p v}
+max x y = if x >= y then x else y
+
+expressing that for any predicate p on values of type a 
+if both inputs satisfy p then the output will satisfy p
+
+It turns out that abstract refinement types greatly enhance the expressiveness of the system
+without increasing its complexity.
+We treat abstract refinements as uninterpreted function symbols, which are already supported 
+by the logic. On the same time, they can be used to propagate properties of input to the output (as in the case of max),
+to express recursive or index dependent invariants of data-types and to refine higher order functions.
+
+% Laziness
+In the presence of laziness traditional refinement systems become unsound.
+This is because of the different (with respect to strict) treatment of infinite computations:
+
+let x = non-terminating
+in     ... assert (false) ...
+
+In a strict language, computation will get stuck while evaluating x, 
+after which every assertion, even the contradiction false, can be verified.
+
+In a lazy setting, a thunk will be created for x and computation will proceed, 
+thus the above assertion should be marked as unsafe.
+
+Verification of the strict alternative is achieved because the refinement type of the
+no-terminating computation carries some information that allows the system to prove any 
+forthcoming assertion.
+
+To address the unsoundness in the lazy setting we choose to ignore the information carried 
+by any potentially non-terminating computation.
+
+To do so, we need a mechanism to identify all such computations.
+It is straightforward to extend refinement types to support a size based termination analysis.
+
+This approach has both advantages and disadvantages.
+One one hand, we ignore all information carried by non-terminating computations.
+even the meaningful ones.
+
+On the other, we regain soundness under lazy evaluation, and 
+liquidHaskell can be used for termination analysis.
+
+%% benchmarks
+We used liquidHaskell to verify safety and functional correctness properties of the following Haskell libraries.
+-- GHC.List, which implements many standard Prelude list
+operations; we verify various size related properties,
+-- Data.Set.Splay, which implements a set data type; 
+we verify that all interface functions return well ordered trees,
+-- Data.Map.Base, which implements a functional map data
+type; we verify that all interface functions return
+binary-search trees,
+-- Bytestring, a library for manipulating byte arrays, we ver-
+ify size-based low-level memory safety and high-level func-
+tional correctness properties, and
+-- Text, a library for high-performance unicode text process-
+ing; we verify various pointer safety and functional correctness
+properties, during which we find a subtle bug.
+
+These libraries sum up to 8706 lines of code and require 
+which require 1750 lines of annotation.
+Moreover, verification time scales
+with respect to both the number of lines 
+and the complexity of the specifications
+averaging about 1 sec for 8 lines of code..
+

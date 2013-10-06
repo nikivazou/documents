@@ -1,0 +1,92 @@
+
+%% FUTURE WORK
+The goal of this project is to create a sound and usable verifier
+for real world haskell applications that can be embedded to an
+existing haskell compiler.
+Many concrete subgoals exist towards this direction:
+
+Soundness:
+ 
+* Give formal semantics of liquidHaskell.
+  Even though the semantics of a core calculus exist, 
+  defining the formal semantics of the core language 
+  will be an interesting venture
+  that would potentially release hidden sources of unsoundness.
+
+
+* As discussed earlier, in the presence of laziness, liquidHaskell's soundeness
+  depends on a termination-checker.We would like to raise this dependency, 
+  by allowing refinement types to carry information of non-termination.
+  A direct approach is to alter the meaning of a refinement type e:{v:a | p}
+  to if computation of e terminates, then the result satisfies p.
+  Though sound, this information is too general to lead to precise results.
+  But, using the termination checker we can have types 
+  `e:{v:a | | p}`
+  stating that the computation of e does terminate and the result satisfy p
+
+Usability:
+
+* Currently, typechecking is performed in granularity of module (haskell file)
+  as the type of each function depends on its call sites.
+  We want to rainse this dependence and get both modularity and speedup, as 
+  then we can parallelize typechecking of many functions.
+  Moreover, we will get incremental type checking: when a user edits a function, 
+  only this function need to be rechecked.
+
+* Multiple types 
+  In liquidHaskell, currently, each expression has a unique type.
+  Many times, we want to use different types on different occurrences of the same expression.
+  thus support of conjunction types seems inevitable.
+
+* Automate measures/inlining
+  From our experience we saw that when verifying a code some procedures are standard.
+  For example, when defining a  new data type we need to describe some properties like its size information.
+  or many times, to enable verification we need to inline some higher order functions.
+  All these procedures can be performed automatically.
+
+* Abstract refinement inference
+  As noted earlier liquid haskell supports abstract refinements to parameterize function types.
+  It would be useful if abstract refinement types can be infered. 
+  It seems though, that blindly trying to parameterize each type will be too expensive, 
+  thus some heuristics should be used.
+
+
+* Tutorial:
+  Currently the tool can be found online combined with a number of examples, 
+  and blog posts on how to use it.
+  Since this is a work in progress many of its features are added or modified.
+  It would be nice to construct and maintain a up-to-date document 
+  that combines both how to use liquidHaskell and our experience so far in using the tool. 
+
+* Error reporting.
+  Currently, liquidHaskell reports only the location of that can not be proven to satisfy the specifications.
+  It turns out that then the user needs to perform some reasoning, most of which is already performed 
+  by the tool. Thus, using ideas from Abduction [Isil] we would like to expose some of these information
+  and interactively help the user identify the source of the error.
+
+
+Real-world Applications
+* More real world benchmarks to investigate if security properties from web applications
+  or concurency conditions can be expressed in the current refinement language.
+
+
+* Haskell idiomatic code: 
+  We would like to investigate how liquidHaskell performs when verifying haskell idiomatic 
+  code that depends on type classes(express measures), monads (express invariants on monads)
+  or infinite structures (currently we can not even refine) 
+
+
+Integration to real compiler
+ Integration to a real compiler can be interprented on two ways.
+ The "straingforward" one is to al 
+* Pattern Match Errors
+  It turns out that by giving the appropriate types to internal ghc functions, refinement type errors can be created
+ 
+
+* Interaction with haskell's dependent types
+  Haskell already supports dependent types. While being very expressive, One of the burdens of which is that the user should
+explicitly provide proofs.
+  A nice research direction is to investigate if we can take advantage of their expressiveness, while asking liquidHaskell to
+  automatically create proofs.
+
+
