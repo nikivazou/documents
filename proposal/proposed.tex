@@ -1,20 +1,20 @@
 \section*{Proposed Work}
 
 The goal of this project is to create a sound and usable verifier
-for real-world haskell applications that can be embedded to an
-existing haskell compiler.
+for real-world Haskell applications that can be embedded to an
+existing Haskell compiler.
 %
 Many concrete subgoals exist towards this direction: \\
 
 \textbf{Soundness}
 \begin{itemize}
 \item
-LiquidHaskell's soundeness
+LiquidHaskell's soundness
 depends on a termination-checker and
-describing infinite structures is not possible.
+soundly describing infinite structures is not possible.
 %
 Since infinite structures appear often in 
-idiomatic haskell programming
+idiomatic Haskell programming
 we would like to cut this dependency, 
 without sacrificing any of the current 
 features (ie., precision, expressiveness) of the tool.
@@ -30,19 +30,19 @@ features (ie., precision, expressiveness) of the tool.
 \item 
 Defining the formal semantics of liquidHaskell
 is a long term goal, 
-as it will provide both to us and the users 
+as it will provide to both us and the users 
 a better understanding of the tool
 \end{itemize}
 
 
 \textbf{Usability}
 \begin{itemize}
-\item Currently, typechecking is performed in granularity of module (haskell file)
+\item Currently, typechecking is performed in granularity of module (Haskell file)
   as the type of each function depends on its call sites.
   We want to cut this dependency and get both modularity and speedup.
   Moreover, 
   typechecking will become parallelizable and incremental, ie., 
-  local modifications to the source code, will require rechecking
+  local modifications to the source code will require rechecking
   only a small amount of code.
 
 %\item Multiple types 
@@ -71,15 +71,16 @@ a better understanding of the tool
 %  It would be nice to construct and maintain a up-to-date document 
 %  that combines both how to use liquidHaskell and our experience so far in using the tool. 
 
-\item Error reporting and diagnosis are crucial in  
+\item Error reporting and diagnosis are crucial for the tool's usability.
+  %
 Currently, when liquidHaskell fails to prove some specification, 
 it reports the location of the code where typechecking fails .
 %
-  It turns out that then the user needs to perform some reasoning to understand the source of this failure.
-  As noted in Abductive Inference [PLDI 12], most of this reasoning is already performed 
+  Then the user needs to perform some reasoning to understand the source of the failure.
+  As noted by Dillig \textit{et al.}, most of this reasoning is already performed 
   by the tool. 
   %
-  It would be ideal to expose some of these information 
+  Ideally, we can expose some of these information 
   either by providing informing error messages or 
   by interactively helping the user identify the source of the error.
 \end{itemize}
@@ -93,7 +94,7 @@ like security properties in web applications
 or data-race freedom in concurrent ones.
 
 \item 
-  We would like to investigate how liquidHaskell performs when verifying haskell idiomatic 
+  We would like to investigate how liquidHaskell performs when verifying Haskell idiomatic 
   code that depends on features like type classes, monads or infinite structures.
   For instance, we would like to verify and use invariants of the state 
   in monadic functions.
@@ -103,10 +104,10 @@ or data-race freedom in concurrent ones.
 \begin{itemize}
 \item LiquidHaskell can run at compile time to track common 
  errors. 
-For instance, it can be used to identify partially defined function, 
+For example, it can be used to identify partially defined functions 
  that can lead to run-time exceptions or 
  that user code satisfies library function invariants, ie,.
- it never takes a the head of an empty list.
+ it never asks for the head of an empty list.
  
 \item LiquidHaskell can interact with haskell's dependent types.
   While being very expressive, dependent types require the user to 

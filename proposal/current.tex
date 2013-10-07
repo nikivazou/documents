@@ -1,19 +1,28 @@
 \section*{Current Work}
-We have implemented liquidHaskell, a tool that given haskell source code 
+We have implemented liquidHaskell, a tool that given Haskell source code 
 and some specifications 
 verifies that the code
 satisfies the specifications.\\
 
 \textbf{Specifications}
-are expressed as \textit{refinement types}, ie. types annotated with logical predicates.
+are expressed as \textit{refinement types}, ie., types annotated with logical predicates.
 As an example, the type $\{v : \text{Int}\ |\ v > 0\}$ describes a value v which is an integer 
 and the refinements specifies that this value is greater than zero.
 %
-The language of the predicates, contains logical formulas, linear arithmetic and uninterpreted functions. 
+The language of the predicates contains logical formulas, linear arithmetic and uninterpreted functions. 
 %
-Using uninterpreted function, the user can define \textit{measures} on haskell data types, 
-for example, he can define a measure \textit{len} that captures the length of a list 
+Using uninterpreted function, the user can define \textit{measures} on Haskell data types, 
+for example, she can define a measure \textit{len} that captures the length of a list 
 and use it to specify interesting list properties.
+
+There are two major advantages on this formulation.
+%
+Firstly, specification language is simple
+as it is a refinement of existing Haskell types with logical formulas.
+%
+Secondly, verification is equivalent to refinement type checking,
+which in turn, through constraint generation, goes down to implication checking
+that can be verified by an STM solver.
 \\
 
 \textbf{The tool:}
@@ -37,7 +46,7 @@ provide stronger specification or alter the program as necessary so that it type
 
 
 \textbf{Benchmarks:}
-We used liquidHaskell to verify safety and functional correctness properties of the following Haskell libraries.
+We used liquidHaskell to verify safety and functional correctness properties of the following Haskell libraries:
 
 \begin{itemize}
 \item \texttt{GHC.List}, which implements many standard Prelude list
@@ -47,11 +56,11 @@ we verify that all interface functions return well ordered trees,
 \item \texttt{Data.Map.Base}, which implements a functional map data
 type; we verify that all interface functions return
 binary-search trees,
-\item \texttt{Bytestring}, a library for manipulating byte arrays, we ver-
-ify size-based low-level memory safety and high-level func-
-tional correctness properties, and
-\item \texttt{Text}, a library for high-performance unicode text process-
-ing; we verify various pointer safety and functional correctness
+\item \texttt{Bytestring}, a library for manipulating byte arrays, we 
+verify size-based low-level memory safety and high-level 
+functional correctness properties, and
+\item \texttt{Text}, a library for high-performance unicode text processing; 
+we verify various pointer safety and functional correctness
 properties, during which we find a subtle bug.
 \end{itemize}
 
@@ -60,9 +69,8 @@ These libraries sum up to 8706 lines of code and require
 Moreover, verification time scales
 with respect to both the number of lines 
 and the complexity of the specifications
-averaging about 1 sec for 8 lines of code..
+averaging about 1 sec per 8 lines of code.
 
-%
 %
 %\textbf{NEW}
 %%% what is new
