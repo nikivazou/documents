@@ -1,77 +1,71 @@
 \subsection*{Motivation}
 
-My research is type-based verification of Haskell programs 
-and aims to create a sound and usable verifier that can be
-embedded into a real haskell compiler.
-
-\textbf{Type-based verification} pushes the advantages of types to limits.
-Among the advantages of type systems is that they enforce code documentation and soundness, by providing interface for functions and catching run time errors.
-
-* Catching run time errors
-Consider a division operator. Its type 
-div :: Int -> Int -> Int
-defines its structure: it is a function that given two integers it will create an integer.
-%
-So, division by a real number (div 4 3.14) will create type error notifying the user the operator is not used correctly, thus catching a potential run time error 
-But, division by zero (div 4  0) will type-check even though it will lead to a run time error.
-
-We use refinement types to refine div's type and specify that the divisor should be proven to be different than zero: 
-div :: Int -> {v:Int | v!=0} -> Int
-Thus now, division by zero (div 4 0) will not only statically catch the 
-error, but also, specify the code that created it.
-
-* Documentation
-Consider a library implementing heap of values `a`.
-In the library there must be a pop function with type
-pop :: Heap a -> (a, Heap a)
-Much of pop's functionality is described by its type:
-pop takes a heap and returns one of its elements and the updated heap.
-What is important is that pop's type is exported, but not its implementation, 
-thus the maintainer of the library can modify pop's implementation  as long as the interface ie., its type, remains unchanged.
-
-
-We use refinement types to enhance the information captured by types.
-As an example, 
-popMax :: Heap a -> (x:a, Heap {v:a | v >= x})
-describes a function that given a heap returns the maximum element of this heap and as before the implementor of a verified heap library 
-should "prove" that any implementation of the function satisfies its exposed type; after which the use can rely on it.
-
-
-%Conclusion
-Since languages that rely on type-systems (like Haskell and ML) 
-are greatly used by both research and industry this projects aims 
-at enhancing the expressiveness of types 
-so that uses can talk not only about the structure, but also about properties of their code.  
-
-
-
-\textbf{Haskell} is an ideal target language for many reasons.
-Its expressive type system force haskell programmers to write documented and correct programs; 
-its purity makes haskell an ideal target for concurrent execution and 
-laziness and sharing give to high performance. 
-Most importantly, haskell has been a prototype for mainstream programming languages,
-hence, by targeting haskell we aim to build a verification system that can hopefully be integrated to other languages.
+%%My research is type-based verification of Haskell programs 
+%%and aims to create a sound and usable verifier that can be
+%%embedded into a real haskell compiler.
+%%
+%%\textbf{Type-based verification} pushes the advantages of types to limits.
+%%Among the advantages of type systems is that they enforce code documentation and soundness, by providing interface for functions and catching run time errors.
+%%
+%%* Catching run time errors
+%%Consider a division operator. Its type 
+%%div :: Int -> Int -> Int
+%%defines its structure: it is a function that given two integers it will create an integer.
+%%%
+%%So, division by a real number (div 4 3.14) will create type error notifying the user the operator is not used correctly, thus catching a potential run time error 
+%%But, division by zero (div 4  0) will type-check even though it will lead to a run time error.
+%%
+%%We use refinement types to refine div's type and specify that the divisor should be proven to be different than zero: 
+%%div :: Int -> {v:Int | v!=0} -> Int
+%%Thus now, division by zero (div 4 0) will not only statically catch the 
+%%error, but also, specify the code that created it.
+%%
+%%* Documentation
+%%Consider a library implementing heap of values `a`.
+%%In the library there must be a pop function with type
+%%pop :: Heap a -> (a, Heap a)
+%%Much of pop's functionality is described by its type:
+%%pop takes a heap and returns one of its elements and the updated heap.
+%%What is important is that pop's type is exported, but not its implementation, 
+%%thus the maintainer of the library can modify pop's implementation  as long as the interface ie., its type, remains unchanged.
+%%
+%%
+%%We use refinement types to enhance the information captured by types.
+%%As an example, 
+%%popMax :: Heap a -> (x:a, Heap {v:a | v >= x})
+%%describes a function that given a heap returns the maximum element of this heap and as before the implementor of a verified heap library 
+%%should "prove" that any implementation of the function satisfies its exposed type; after which the use can rely on it.
+%%
+%%
+%%%Conclusion
+%%Since languages that rely on type-systems (like Haskell and ML) 
+%%are greatly used by both research and industry this projects aims 
+%%at enhancing the expressiveness of types 
+%%so that uses can talk not only about the structure, but also about properties of their code.  
+%%
 
 
+Haskell is a cutting edge functional programming language:
+it produces clean and concise code;
+its expressive type system force documented and correct programs; 
+its purity allows native concurrency and 
+it provides higher performance than many mainstream languages (like Java or C++). 
 
-\textbf{Usability:}
-A key feature of this project is to make verification of haskell source code, easy to use.
-Haskell already supports verification via dependent types, but it 
+
+Though, formal verification of haskell source code has been cumbersome.
+Haskell supports verification via dependent types, which requires  
 major code modification (ie., lifting expressions to types)
-and explicitly providing proofs.
-Both these features render verification with dependent types cumbersome [hazohism].
+and explicit proofs.
+% Both these features render verification with dependent types cumbersome [hazohism].
 %
-We  provide an easier to use approach as 
-minimum code modifications are required 
-and the proofs are inferred using an SMT solver.
-\\
 
-All in all, the goal of this project is using the power of SMT solvers to 
-create a next-generation type based verifier for Haskell.
-Moreover, the project focuses on the usability and simplicity of the specification:
-the specification language is simple, as it is based on the existing type annotations.
-Moreover, the code modifications and annotations required for verification should be minor.
-
-
-
-
+The goal of my research project is to combine haskell's type system with 
+the power of SMT solvers to 
+create a next-generation verifier for haskell.
+%
+A key feature of this project is to make verification \textit{usable}:
+the specification language should be simple and 
+verification should require minimum code modifications and annotations. 
+%
+Finally, since haskell has been a prototype for mainstream programming languages,
+by targeting haskell we aim to build a verification system that can hopefully be integrated to other languages.
