@@ -1,14 +1,14 @@
 Haskell is a cutting edge functional programming language:
-it produces clean and concise code;
-its expressive type system force documented and correct programs; 
+it enforces clean and concise code,
+its expressive type system leads to documented and correct programs, 
 its purity allows native concurrency and 
-it provides higher performance than many mainstream languages (like Java or C++). 
+it provides higher performance than many mainstream languages (like Java or \verb!C++!). 
 
 
 Though, formal verification of Haskell source code has been cumbersome.
 Haskell supports verification via dependent types, which requires  
-major code modification (ie., lifting expressions to types)
-and explicit proofs.
+major code modifications (ie., lifting expressions to types)
+and explicit proofs to be provided by the users.
 % Both these features render verification with dependent types cumbersome [hazohism].
 %
 
@@ -20,6 +20,6 @@ A key feature of this verifier is  \textit{usability}:
 the specification language should be simple and 
 verification should require minimum code modifications and annotations. 
 %
-Finally, since Haskell has been a prototype for mainstream programming languages,
-hopefully, this type of verification could be 
+Hopefully, since Haskell has been a prototype for mainstream programming languages,
+this type of verification could be 
 integrated to standard application development chain.
