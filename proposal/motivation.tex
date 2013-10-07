@@ -1,11 +1,10 @@
-%%%%%%% 
-MOTIVATION - GOAL
+\subsection*{Motivation}
+
 My research is type-based verification of Haskell programs 
 and aims to create a sound and usable verifier that can be
 embedded into a real haskell compiler.
 
-** type-based verification
-Type-based verification pushes the advantages of types to limits.
+\textbf{Type-based verification} pushes the advantages of types to limits.
 Among the advantages of type systems is that they enforce code documentation and soundness, by providing interface for functions and catching run time errors.
 
 * Catching run time errors
@@ -46,7 +45,7 @@ so that uses can talk not only about the structure, but also about properties of
 
 
 
-** Haskell
+\textbf{Haskell:}
 The choice of Haskell as a target language for this project is not random, as its features have render haskell as a promising language.
 Specifically, its expressive type system lead haskell programmers to write documented and  correct programs; the fact that it is a pure language, makes haskell an ideal target for concurrent execution and finally, features such as laziness and sharing lead to high performance. 
 Most importantly, haskell has be seen to work as a prototype for mainstream languages,
@@ -54,8 +53,7 @@ hence, by targeting haskell we aim to build a next generation verification syste
 
 
 
-** Usability
-
+\textbf{Usability:}
 A key feature of this project is to make verification of haskell source code, easy to use.
 Haskell already supports verification via dependent types, but their usage requires that the user
 (1) modifies the existing code by lifting expressions to types
@@ -70,6 +68,7 @@ A refinement type is just a haskell type where each basic type `a` can be annota
 With this, existing haskell code can be verified with minimum modifications.
 % 
 Type checking of refinements is decidable and proofs are automatically created using SMT solvers (as z3) which provides advantage, as the increasing interest on SMT solvers allows fast type checking.
+\\
 
 All in all, the goal of this project is using the power of SMT solvers to 
 create a next-generation type based verifier for Haskell and integrate it to ghc.
