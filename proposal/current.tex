@@ -6,22 +6,25 @@ satisfies the specifications.\\
 
 \textbf{Specifications}
 are expressed as \textit{refinement types}, ie., types annotated with logical predicates.
-As an example, the type $\{v : \text{Int}\ |\ v > 0\}$ describes a value v which is an integer 
+As an example, the type $\left\lbrace v : \text{Int}\ |\ v > 0 \right\rbrace $ 
+describes a value $v$ which is an integer 
 and the refinements specifies that this value is greater than zero.
 %
 The language of the predicates contains logical formulas, linear arithmetic and uninterpreted functions. 
 %
-Using uninterpreted function, the user can define \textit{measures} on Haskell data types, 
-for example, she can define a measure \textit{len} that captures the length of a list 
+Using uninterpreted functions the user can define \textit{measures} on Haskell data types, 
+for instance, she can define a measure \textit{len} that captures the length of a list 
 and use it to specify interesting list properties.
 
 There are two major advantages on this formulation.
 %
 Firstly, specification language is simple
-as it is a refinement of existing Haskell types with logical formulas.
+as most programmers are familiar with both
+its ingredients, ie., Haskell types and logical formulas.
 %
 Secondly, verification is equivalent to refinement type checking,
-which in turn, through constraint generation, goes down to implication checking
+which in turn, through constraint generation, goes down to 
+decidable implication checking
 that can be verified by an STM solver.
 \\
 
@@ -29,12 +32,13 @@ that can be verified by an STM solver.
 LiquidHaskell, takes as input
 a target Haskell source file, with the desired refinement types specified as a special
 form of comment annotation.
-
-After analyzing the program, liquidHaskell returns as output:
+%
+After analysing the program, liquidHaskell returns as output:
 
 \begin{itemize}
 \item
- Either SAFE, indicating that all the specifications indeed verify, or UNSAFE, indicating there are refinement type errors, together with the positions in the source
+Either SAFE, indicating that all the specifications indeed verify, 
+or UNSAFE, indicating there are refinement type errors, together with the positions in the source
 code where type checking fails.
 \item
 An HTML file containing the program source code annotated with inferred refinement types for all sub-expressions in the program. 
@@ -64,8 +68,9 @@ we verify various pointer safety and functional correctness
 properties, during which we find a subtle bug.
 \end{itemize}
 
-These libraries sum up to 8706 lines of code and require 
-1750 lines of annotation.
+As a quantitative summary, 
+these libraries sum up to 8706 lines of code and require 
+1750 lines of annotations.
 Moreover, verification time scales
 with respect to both the number of lines 
 and the complexity of the specifications
