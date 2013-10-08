@@ -15,7 +15,7 @@ soundly describing infinite structures is not possible.
 %
 Since infinite structures appear often in 
 idiomatic Haskell programming
-we would like to cut this dependency, 
+we would like to cut this dependency
 without sacrificing any of the current 
 features (ie., precision, expressiveness) of the tool.
 
@@ -31,7 +31,7 @@ features (ie., precision, expressiveness) of the tool.
 Defining the formal semantics of liquidHaskell
 is a long term goal, 
 as it will provide to both us and the users 
-a better understanding of the tool
+a better understanding of the tool.
 \end{itemize}
 
 
@@ -51,11 +51,15 @@ a better understanding of the tool
 %  thus support of conjunction types seems inevitable.
 
 \item 
-  Some standard requirements appear often when verifying code. 
-  For example, when defining a new data type we need to describe 
-  its size,
-  or many times, to enable verification we need to inline higher order functions.
-  LiquidHaskell can automatically perform these standard procedures.
+  Often verification requires some standard preprocessing of the source code. 
+  Two common examples are 
+  defining the size of a new data type and
+  inlining higher order functions,
+  both of which could be automatically performed.
+  % 
+  Thus, towards usability LiquidHaskell should perform code transformations
+  to ease verification while keeping the semantics
+  and minimize the annotation burden by inferring information whenever possible.
   
 %\item Abstract refinement inference
 %  As noted earlier liquid haskell supports abstract refinements to parameterize function types.
@@ -73,14 +77,16 @@ a better understanding of the tool
 
 \item Error reporting and diagnosis are crucial for the tool's usability.
   %
-Currently, when liquidHaskell fails to prove some specification, 
-it reports the location of the code where typechecking fails .
-%
-  Then the user needs to perform some reasoning to understand the source of the failure.
-  As noted by Dillig \textit{et al.}, most of this reasoning is already performed 
-  by the tool. 
+  Currently, when liquidHaskell fails to prove some specification, 
+  it reports the location of the code where typechecking fails.
   %
-  Ideally, we can expose some of these information 
+  Then the user needs to understand the source of the failure, 
+  ie., to simulate the reasoning that lead the tool to decide unsafety.
+  %
+  Since this reasoning was already performed by liquidHaskell, 
+  it would be ideal
+  %	
+  to expose some of its steps 
   either by providing informing error messages or 
   by interactively helping the user identify the source of the error.
 \end{itemize}
@@ -96,23 +102,25 @@ or data-race freedom in concurrent ones.
 \item 
   We would like to investigate how liquidHaskell performs when verifying Haskell idiomatic 
   code that depends on features like type classes, monads or infinite structures.
-  For instance, we would like to verify and use invariants of the state 
-  in monadic functions.
+  For instance, we would like to verify and use invariants on the state 
+  of monadic functions.
 \end{itemize}
 
-\textbf{Integration to a real compiler.}
+\textbf{Integration to a real compiler}
 \begin{itemize}
-\item LiquidHaskell can run at compile time to track common 
- errors. 
-For example, it can be used to identify partially defined functions 
+\item LiquidHaskell can be automatically used when compiling 
+      plain (without specifications) code
+      to verify natively imposed specifications. 
+	 %
+For instance, it can prove the absence of partially defined functions 
  that can lead to run-time exceptions or 
- that user code satisfies library function invariants, ie,.
- it never asks for the head of an empty list.
+ library imposed specifications, as that 
+ the used never asks for the head of an empty list.
  
-\item LiquidHaskell can interact with haskell's dependent types.
+\item LiquidHaskell can interact with Haskell's dependent types. 
   While being very expressive, dependent types require the user to 
   explicitly provide proofs.
-  A nice research direction is to investigate 
+  An interesting research direction is to investigate 
   whether liquidHaskell can be used to automatically infer
   some of the required proofs.
   \end{itemize}
@@ -120,5 +128,5 @@ For example, it can be used to identify partially defined functions
 In a nutshell, the ultimate goal is to create a 
 user-friendly, efficient, and sound tool 
 so as to integrate formal verification, via liquidHaskell, 
-into the development chain of haskell applications.
+into the development chain of Haskell applications.
 
