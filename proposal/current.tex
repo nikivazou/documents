@@ -8,12 +8,12 @@ satisfies the specifications.\\
 are expressed as \textit{refinement types}, ie., types annotated with logical predicates.
 As an example, the type $\left\lbrace v : \text{Int}\ |\ v > 0 \right\rbrace $ 
 describes a value $v$ which is an integer 
-and the refinements specifies that this value is greater than zero.
+and the refinement specifies that this value is greater than zero.
 %
 The language of the predicates contains logical formulas, linear arithmetic and uninterpreted functions. 
 %
-Using uninterpreted functions the user can define \textit{measures} on Haskell data types, 
-for instance, she can define a measure \textit{len} that captures the length of a list 
+Using uninterpreted functions the user defines \textit{measures} on Haskell data types, 
+for instance, they can define a measure \textit{len} that captures the length of a list 
 and use it to specify interesting list properties.
 
 There are two major advantages on this formulation.
@@ -42,7 +42,7 @@ or UNSAFE, indicating there are refinement type errors, together with the positi
 code where type checking fails.
 \item
 An HTML file containing the program source code annotated with inferred refinement types for all sub-expressions in the program. 
-When a type error is reported,  it is highlighted with red color, and the programmer can use the inferred
+When a type error is reported, it is highlighted with red color and the programmer can use the inferred
 types to determine why their program does not typecheck: they can examine what
 properties liquidHaskell can deduce about various program expressions and 
 provide stronger specification or alter the program as necessary so that it typechecks.
