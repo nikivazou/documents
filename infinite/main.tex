@@ -108,7 +108,9 @@ $$
 \interp{\tref{v}{b}{e_v}} &= 
 	\{e \mid \hastype{}{e}{b} 
 	\land 
-	\evals{e}{v} \Rightarrow \evals{e_v\sub{v}{e}}{\etrue} \}\\
+	\evals{e}{v} \Rightarrow 
+	\evals{e_v\sub{v}{e}}{v'} \Rightarrow 
+	\evals{e_v\sub{v}{e}}{\etrue} \}\\
 \interp{\tfun{x}{\tau_x}{\tau}} &= 
 	\{e \mid \hastype{}{e}{\erase{\tau} \rightarrow \erase{\tau_x}} 
 	\land 
