@@ -8,6 +8,7 @@
 \include{haskellListings}
 
 \newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
 
 
 
@@ -28,6 +29,7 @@
 \newcommand\tfun[3]{\ensuremath{#1\colon #2 \rightarrow #3}}
 
 %% OTHER
+\newcommand\fin[1]{\ensuremath{\text{Fin}\ (#1)}}
 \newcommand\sub[2]{\ensuremath{\left[ #2 / #1 \right]}}
 \newcommand\erase[1]{\ensuremath{\lfloor #1 \rfloor}}
 
@@ -126,11 +128,19 @@ $$
 
 $$
 \inference{
-	(x,\tau) \in \Gamma
+	(x,\tref{v}{b}{e}) \in \Gamma
+}{
+	\hastype{\Gamma}{x}{\tref{v}{b}{v=x}}
+}
+\qquad
+\inference{
+	(x,\tau) \in \Gamma &&
+	\tau \equiv \tfun{x'}{\tau_x'}{\tau'}
 }{
 	\hastype{\Gamma}{x}{\tau}
 }
-\qquad
+$$
+$$
 \inference{
 }{
 	\hastype{\Gamma}{c}{ty(c)}
@@ -197,7 +207,7 @@ $$
 $$
 \inference{
 	\forall \theta. \iswellformed{\Gamma}{\theta} \land
-	\evals{\theta\ e_1}{\etrue} \Rightarrow \evals{\theta\ e_2}{\etrue}
+	\evals{\theta\ e_1}{\etrue} \Rightarrow \evals{\theta\ e_2:s}{\etrue}
 }{
 	\issubref{\Gamma}{e_1}{e_2}
 }
@@ -230,14 +240,14 @@ then \evals{e\sub{v}{c}}{\etrue} and $\forall c'\ c' \neq c. \lnot (\evals{e\sub
 
 \section*{Semantic Typing}
 \begin{align*}
-\shastype{\Gamma}{e}{\tau} & = 
+\shastype{\Gamma}{e}{\tau} & \doteq
 	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ e \in \interp{\theta \ \tau}\\
-\sissubtype{\Gamma}{\tau_1}{\tau_2} & = 
-	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \interp{\tau_1} \subseteq \interp{\tau_2}
+\sissubtype{\Gamma}{\tau_1}{\tau_2} & \doteq 
+	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \interp{\theta\ \tau_1} \subseteq \interp{\theta\ \tau_2}
 \end{align*}
 
 
-\begin{lemma}
+\begin{lemma}.
 \begin{enumerate}
 \item If \issubtype{\Gamma}{\tau_1}{\tau_2} then \sissubtype{\Gamma}{\tau_1}{\tau_2} 
 \item If \hastype{\Gamma}{e}{\tau} then \shastype{\Gamma}{e}{\tau} 
@@ -269,9 +279,36 @@ If \hastype{\Gamma}{e_x}{\tau_x}, then
 
 
 \begin{lemma}[Preservation]
-If \hastype{\emptyset}{e}{\tau} and \eval{e}{e'} then \hastype{\emptyset}{e'}{\tau}.
+If \hastype{\Gamma}{e}{\tau} and \eval{e}{e'} then \hastype{\Gamma}{e'}{\tau}.
 \end{lemma}
 \begin{lemma}[Progress]
 If \hastype{\emptyset}{e}{\tau} and $e \neq v$ then there exists an $e'$ such that \eval{e}{e'}.
 \end{lemma}
+
+\section*{Interpretations}
+\begin{align*}
+\fin{e} \doteq \exists v. \evals{e}{v}
+\end{align*}
+
+\begin{align*}
+\interp{x}&=x &&&
+\interp{\efun{x}{e}}&=f\\
+\interp{c}&=c &&&
+\interp{\eapp{e_1}{e_2}}&=\interp{e_1}(\interp{e_2})\\
+\end{align*}
+
+\begin{claim}
+$$
+\left\lbrace	
+	\bigwedge_{(x,\tref{b}{v}{e})\in\Gamma}(\fin{x}\Rightarrow \interp{e\sub{v}{x}})
+	\Rightarrow \interp{e_1}
+	\Rightarrow \interp{e_2}
+\right\rbrace
+\Rightarrow
+\left\lbrace	
+\issubref{\Gamma}{e_1}{e_2}
+\right\rbrace
+$$
+\end{claim}
+
 \end{document}
