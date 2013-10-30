@@ -29,6 +29,7 @@
 \newcommand\tfun[3]{\ensuremath{#1\colon #2 \rightarrow #3}}
 
 %% OTHER
+\newcommand\valid[1]{\ensuremath{\text{Valid}\ (#1)}}
 \newcommand\fin[1]{\ensuremath{\text{Fin}\ (#1)}}
 \newcommand\sub[2]{\ensuremath{\left[ #2 / #1 \right]}}
 \newcommand\erase[1]{\ensuremath{\lfloor #1 \rfloor}}
@@ -104,13 +105,14 @@ $$
 \end{align*}
 
 \section*{Interpretations}
+$$\valid{e} \Leftrightarrow \evals{e}{v}\Rightarrow\evals{e}{\etrue}$$
+
 \begin{align*}
 \interp{\tref{v}{b}{e_v}} &= 
 	\{e \mid \hastype{}{e}{b} 
 	\land 
-	\evals{e}{v} \Rightarrow 
-	\evals{e_v\sub{v}{e}}{v'} \Rightarrow 
-	\evals{e_v\sub{v}{e}}{\etrue} \}\\
+	\evals{e}{v_e} \Rightarrow 
+	\valid{e_v\sub{v}{e}} \}\\
 \interp{\tfun{x}{\tau_x}{\tau}} &= 
 	\{e \mid \hastype{}{e}{\erase{\tau} \rightarrow \erase{\tau_x}} 
 	\land 
@@ -209,7 +211,7 @@ $$
 $$
 \inference{
 	\forall \theta. \iswellformed{\Gamma}{\theta} \land
-	\evals{\theta\ e_1}{\etrue} \Rightarrow \evals{\theta\ e_2:s}{\etrue}
+	\valid{\theta\ e_1} \Rightarrow \valid{\theta\ e_2}
 }{
 	\issubref{\Gamma}{e_1}{e_2}
 }
