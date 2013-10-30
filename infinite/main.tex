@@ -1,0 +1,277 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{commands}
+\usepackage[inference]{semantic}
+\include{haskellListings}
+
+\newtheorem{lemma}{Lemma}
+
+
+
+%% EXPRESSIONS
+\newcommand\efun[2]{\ensuremath{\lambda #1 . #2}}
+\newcommand\eapp[2]{\ensuremath{#1 \ #2}}
+\newcommand\elet[3]{\ensuremath{\text{let}\ #1 = #2\ \text{in}\ #3}}
+\newcommand\erec[3]{\ensuremath{\mu #1 \lambda #2 . #3}}
+
+\newcommand\etrue{\ensuremath{\text{true}}}
+\newcommand\efalse{\ensuremath{\text{false}}}
+
+
+%% TYPES
+\newcommand\tint{\ensuremath{\text{int}}}
+\newcommand\tbool{\ensuremath{\text{bool}}}
+\newcommand\tref[3]{\ensuremath{\left\lbrace #1 \colon #2 \mid #3 \right\rbrace}}
+\newcommand\tfun[3]{\ensuremath{#1\colon #2 \rightarrow #3}}
+
+%% OTHER
+\newcommand\sub[2]{\ensuremath{\left[ #2 / #1 \right]}}
+\newcommand\erase[1]{\ensuremath{\lfloor #1 \rfloor}}
+
+\newcommand\interp[1]{\ensuremath{[|#1|]}}
+\newcommand\eval[2]{\ensuremath{#1 \hookrightarrow #2}}
+\newcommand\evals[2]{\ensuremath{#1 \hookrightarrow^\star #2}}
+\newcommand\hastype[3]{\ensuremath{#1 \vdash #2 \colon #3}}
+\newcommand\shastype[3]{\ensuremath{#1 \vdash #2 \in #3}}
+\newcommand\iswellformed[2]{\ensuremath{#1 \vdash #2}}
+\newcommand\biswellformed[2]{\ensuremath{#1 \vdash_B #2}}
+\newcommand\issubtype[3]{\ensuremath{#1 \vdash #2 \preceq #3}}
+\newcommand\sissubtype[3]{\ensuremath{#1 \vdash #2 \subseteq #3}}
+\newcommand\issubref[3]{\ensuremath{#1 \vdash #2 \Rightarrow #3}}
+\title{Refinements for Lazy Evaluation}
+\begin{document}
+\section*{Syntax}
+$$
+\begin{array}{rrcl}
+\emphbf{Value} \quad 
+  & v
+  & ::= 
+  &   	 c 
+  \spmid \efun{x}{e} 
+  \\[0.05in] 
+
+
+\emphbf{Expressions} \quad 
+  & e
+  & ::= 
+  &   	 v 
+  \spmid x 
+  \spmid \eapp{e}{e}    
+  \\[0.05in] 
+
+\emphbf{Basic Types} \quad 
+  & b
+  & ::=  
+  & 	\tint \spmid \tbool
+  \\[0.05in] 
+
+\emphbf{Types} \quad 
+  & \tau
+  & ::=  
+  & 	\tref{v}{b}{e}
+  \spmid \tfun{x}{\tau}{\tau}    
+  \\[0.05in] 
+
+\emphbf{Environment} \quad 
+  & \Gamma
+  & ::= 
+  &     \emptyset \spmid x\colon \tau, \Gamma
+
+\end{array}
+$$
+
+
+\section*{Operational Semantic}
+
+$$
+\begin{array}{ll}
+\eval{\eapp{e_1}{e_2}}{\eapp{e_1'}{e_2}} & \text{if } \eval{e_1}{e_1'}\\
+\eval{\eapp{\efun{x}{e}}{e_x}}{e\sub{x}{e_x}} &\\
+\eval{\eapp{c}{e}}{\eapp{c}{e'}} & \text{if } \eval{e}{e'}\\
+\eval{\eapp{c}{v}}{[|c|](v)}
+\end{array}
+$$
+
+\section*{Erasing}
+\begin{align*}
+\erase{\tref{v}{b}{e}}&=b\\
+\erase{\tfun{x}{\tau_x}{\tau}}&= \erase{\tau_x} \rightarrow \erase{\tau}
+\end{align*}
+
+\section*{Interpretations}
+\begin{align*}
+\interp{\tref{v}{b}{e_v}} &= 
+	\{e \mid \hastype{}{e}{b} 
+	\land 
+	\evals{e}{v} \Rightarrow \evals{e_v\sub{v}{e}}{\etrue} \}\\
+\interp{\tfun{x}{\tau_x}{\tau}} &= 
+	\{e \mid \hastype{}{e}{\erase{\tau} \rightarrow \erase{\tau_x}} 
+	\land 
+	\forall e_x \in \interp{\tau_x}. \
+	 \eapp{e}{e_x} \in \interp{\tau\sub{x}{e_x}} 
+	 \}
+\end{align*}
+
+\section*{Typing}
+
+\hfill\mbox{\hastype{\Gamma}{e}{\tau}}
+
+%% unifying these rules for simplicity, 
+%% You can fake it: every time you add a
+%% binding to env it should have 	v = x
+%% then I get this by implication
+
+$$
+\inference{
+	(x,\tau) \in \Gamma
+}{
+	\hastype{\Gamma}{x}{\tau}
+}
+\qquad
+\inference{
+}{
+	\hastype{\Gamma}{c}{ty(c)}
+}
+\qquad
+\inference{
+	\hastype{\Gamma}{e}{\tau'} &&
+	\issubtype{\Gamma}{\tau'}{\tau} &&
+	\iswellformed{\Gamma}{\tau} &&
+}{
+	\hastype{\Gamma}{e}{\tau}
+}
+$$
+$$
+\inference{
+	\hastype{\Gamma, x\colon\tau_x}{e}{\tau} &&
+	\iswellformed{\Gamma}{\tau_x}
+}{
+	\hastype{\Gamma}{\efun{x}{e}}{(\tfun{x}{\tau_x}{\tau})}
+}
+\qquad
+\inference{
+	\hastype{\Gamma}{e_1}{(\tfun{x}{\tau_{x}}{\tau})} &&
+	\hastype{\Gamma}{e_2}{\tau_{x}}
+}{
+	\hastype{\Gamma}{\eapp{e_1}{e_2}}{\tau\sub{x}{e_2}}
+}
+$$
+
+
+\hfill\mbox{\iswellformed{\Gamma}{\tau}}
+$$
+\inference{
+	\hastype{\Gamma, v\colon b}{e}{\tbool}
+}{
+	\iswellformed{\Gamma}{\tref{v}{b}{e}}
+}
+\qquad
+\inference{
+	\iswellformed{\Gamma}{\tau_x} &&
+	\iswellformed{\Gamma, x \colon \tau_x}{\tau}
+}{
+	\iswellformed{\Gamma}{\tfun{x}{\tau_x}{\tau}}
+}
+$$
+
+\hfill\mbox{\issubtype{\Gamma}{\tau}{\tau}}
+$$
+\inference{
+	\issubref{\Gamma, v:b}{e_1}{e_2}
+}{
+	\issubtype{\Gamma}{\tref{v}{b}{e_1}}{\tref{v}{b}{e_2}}
+}
+\qquad
+\inference{
+	\issubtype{\Gamma}{\tau'_x}{\tau_x} &&
+	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'}
+}{
+	\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}
+}
+$$
+
+\hfill\mbox{\issubref{\Gamma}{e}{e}}
+$$
+\inference{
+	\forall \theta. \iswellformed{\Gamma}{\theta} \land
+	\evals{\theta\ e_1}{\etrue} \Rightarrow \evals{\theta\ e_2}{\etrue}
+}{
+	\issubref{\Gamma}{e_1}{e_2}
+}
+$$
+
+
+
+\hfill\mbox{\iswellformed{\Gamma}{\theta}}
+$$
+\inference{
+	\forall x \in \text{Dom}(\Gamma). 
+	\theta(x) \in \interp{\theta \ \Gamma(x)}
+}{
+	\iswellformed{\Gamma}{\theta}
+}
+$$
+
+
+\section*{Constants}
+For each constant $c$, 
+\begin{enumerate}
+\item \hastype{\emptyset}{c}{ty(c)}
+\item If $ty(c) = \tfun{x}{\tau_x}{\tau}$, then for each $v$ such that
+\hastype{\emptyset}{v}{\tau_x} $\interp{c}(v)$ is defined and
+\hastype{}{\interp{c}(v)}{\tau\sub{x}{v}}
+\item If $ty(c) = \tref{v}{b}{e}$, 
+then \evals{e\sub{v}{c}}{\etrue} and $\forall c'\ c' \neq c. \lnot (\evals{e\sub{v}{c'}}{\etrue})$ 
+\end{enumerate}
+
+
+\section*{Semantic Typing}
+\begin{align*}
+\shastype{\Gamma}{e}{\tau} & = 
+	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ e \in \interp{\theta \ \tau}\\
+\sissubtype{\Gamma}{\tau_1}{\tau_2} & = 
+	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \interp{\tau_1} \subseteq \interp{\tau_2}
+\end{align*}
+
+
+\begin{lemma}
+\begin{enumerate}
+\item If \issubtype{\Gamma}{\tau_1}{\tau_2} then \sissubtype{\Gamma}{\tau_1}{\tau_2} 
+\item If \hastype{\Gamma}{e}{\tau} then \shastype{\Gamma}{e}{\tau} 
+\end{enumerate}
+\end{lemma}
+
+\begin{lemma}
+If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}
+\end{lemma}
+
+
+\begin{lemma}[Substitution]
+If \hastype{\Gamma}{e_x}{\tau_x}, then 
+\begin{enumerate}
+\item If 
+	\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau_1}{\tau_2}
+	then
+	\issubtype{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau_1}{\sub{x}{e_x}\tau_2}
+\item If 
+	\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}
+	then
+	\hastype{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}e}{\sub{x}{e_x}\tau}
+\item If 
+	\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau}
+	then
+	\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau}
+\end{enumerate}
+\end{lemma}
+
+
+\begin{lemma}[Preservation]
+If \hastype{\emptyset}{e}{\tau} and \eval{e}{e'} then \hastype{\emptyset}{e'}{\tau}.
+\end{lemma}
+\begin{lemma}[Progress]
+If \hastype{\emptyset}{e}{\tau} and $e \neq v$ then there exists an $e'$ such that \eval{e}{e'}.
+\end{lemma}
+\end{document}
