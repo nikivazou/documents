@@ -12,8 +12,14 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
 
+\newcommand\showproof[1]{}
+
 %% RULE NAMES
 \newcommand\rulename[1]{\textsc{#1}\xspace}
+
+
+\newcommand\rwbase{\rulename{WF-Base}}
+\newcommand\rwfun{\rulename{WF-Fun}}
 
 \newcommand\rsubbase{\ensuremath{\preceq}\rulename{-Base}}
 \newcommand\rsubfun{\ensuremath{\preceq}\rulename{-Fun}}
@@ -22,6 +28,7 @@
 \newcommand\rtvarbase{\rulename{T-Var-Base}}
 \newcommand\rtconst{\rulename{T-Const}}
 \newcommand\rtsub{\rulename{T-Sub}}
+\newcommand\rtexact{\rulename{T-Ex}}
 \newcommand\rtfun{\rulename{T-Fun}}
 \newcommand\rtapp{\rulename{T-App}}
 
@@ -58,7 +65,7 @@
 % \newcommand\generalconditionImplOne[2]{\ensuremath{\valid{#1}}}
 
 \newcommand\generalconditionInterp[2]
-	{\ensuremath{\fin{#1} \land (\forall i. \fini{#1} \Rightarrow \validi{#2})}}
+	{\ensuremath{(\forall i. \fini{#1} \Rightarrow \validi{#2})}}
 \newcommand\generalconditionImpl[2]
 	{\ensuremath{\forall i . \validi{#1} \Rightarrow \validi{#2}}}
 \newcommand\generalconditionImplOne[1]
@@ -135,6 +142,11 @@ $$
 \end{align*}
 
 
+\section*{Substitutions}
+\begin{align*}
+(\tref{v}{b}{e})\sub{y}{e_y} &=\tref{v}{b}{e\sub{y}{e_y}}\\
+(\tfun{x}{\tau_x}{\tau})\sub{y}{e_y} &=\tfun{x}{(\tau_x\sub{y}{e_y})}{(\tau\sub{y}{e_y})}
+\end{align*}
 
 \section*{Interpretations}
 \begin{align*}
@@ -163,9 +175,16 @@ $$
 %\rtvarbase
 %\rtconst
 %\rtsub
+%\rtexact
 %\rtfun
 %\rtapp
-
+$$
+\inference{
+	\hastype{\Gamma}{e}{\tref{v}{b}{e'}}
+}{
+	\hastype{\Gamma}{e}{\tref{v}{b}{v = e}}
+}[\rtexact]
+$$
 $$
 \inference{
 	(x,\tref{v}{b}{e}) \in \Gamma
@@ -217,14 +236,14 @@ $$
 	\hastype{\Gamma, v\colon b}{e}{\tbool}
 }{
 	\iswellformed{\Gamma}{\tref{v}{b}{e}}
-}
+}[\rwbase]
 \qquad
 \inference{
 	\iswellformed{\Gamma}{\tau_x} &&
 	\iswellformed{\Gamma, x \colon \tau_x}{\tau}
 }{
 	\iswellformed{\Gamma}{\tfun{x}{\tau_x}{\tau}}
-}
+}[\rwfun]
 $$
 
 \hfill\mbox{\issubtype{\Gamma}{\tau}{\tau}}
@@ -253,6 +272,17 @@ $$
 }[\rimpl]
 $$
 
+\hfill\mbox{\iswellformed{}{\Gamma}}
+$$
+\inference{
+	\iswellformed{}{\Gamma} &&
+	\iswellformed{\Gamma}{\tau}
+}{
+	\iswellformed{}{x\colon\tau,\Gamma}
+}
+\qquad
+\inference{}{\iswellformed{}{\emptyset}}
+$$
 
 
 \hfill\mbox{\iswellformed{\Gamma}{\theta}}
@@ -295,13 +325,14 @@ $$\generalconditionImplOne{e = e}$$
 \item If \hastype{\Gamma}{e}{\tau} then \shastype{\Gamma}{e}{\tau} 
 \end{enumerate}
 \end{lemma}
+\showproof{
 \begin{proof}
-\input{proofs/interp.tex}
-\end{proof}
+\input{proofs/interp}
+\end{proof}}
 
 
 \begin{lemma}[Substitution]
-If \hastype{\Gamma}{e_x}{\tau_x}, then 
+If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{\Gamma, x\colon\tau_x ,\Gamma'}, then 
 \begin{enumerate}
 \item If 
 	\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau_1}{\tau_2}
@@ -317,7 +348,9 @@ If \hastype{\Gamma}{e_x}{\tau_x}, then
 	\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau}
 \end{enumerate}
 \end{lemma}
-
+\begin{proof}
+\input{proofs/substitution}
+\end{proof}
 
 \begin{lemma}
 If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}

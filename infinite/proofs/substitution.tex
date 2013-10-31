@@ -1,0 +1,285 @@
+If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{\Gamma, x\colon\tau_x ,\Gamma'}, then 
+\begin{enumerate}
+\item\label{proof:sub:sub} Assume
+	$$\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau_1}{\tau_2}$$
+We will prove the lemma by induction on the derivation tree.
+\begin{itemize}
+\item \rsubbase
+Assume
+	$$\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau_1}{\tau_2}$$
+where $\tau_1 \equiv \tref{v}{b}{e_1}$
+and   $\tau_2 \equiv \tref{v}{b}{e_2}$
+By inversion
+	$$
+	\issubref{\Gamma, x\colon\tau_x, \Gamma',v:b}{e_1}{e_2}
+	$$
+By inversion
+	\begin{align*}
+	\forall &\theta, e'_x, \theta',e .
+	\iswellformed{\Gamma, x\colon\tau_x, \Gamma',v:b}{\theta\sub{x}{e'_x}\theta'\sub{v}{e}}\\& \Rightarrow
+	\generalconditionImpl{(\theta\sub{x}{e'_x}\theta'\sub{v}{e})e_1}{(\theta\sub{x}{e'_x}\theta'\sub{v}{e})e_2}
+	\end{align*}
+
+But \hastype{\Gamma}{e_x}{\tau_x}, so \shastype{\Gamma}{e_x}{\tau_x}, so
+	\begin{align*}
+	\forall &\theta, \theta',e .
+	\iswellformed{\Gamma,x\colon\tau_x, \Gamma',v:b}{\theta \sub{x}{e_x}\theta'\sub{v}{e}}\\& \Rightarrow
+	\generalconditionImpl{(\theta\sub{x}{e_x}\theta'\sub{v}{e})e_1}{(\theta\sub{x}{e_x}\theta'\sub{v}{e})e_2}
+	\end{align*}
+Or \hastype{\Gamma}{e_x}{\tau_x}, so \shastype{\Gamma}{e_x}{\tau_x}, so
+	\begin{align*}
+	\forall &\theta, \theta',e .
+	\iswellformed{\Gamma,\sub{x}{e_x}\Gamma',v:b}{\theta\theta'\sub{v}{e}}\\& \Rightarrow
+	\generalconditionImpl{(\theta\theta'\sub{v}{e})(e_1\sub{x}{e_x})}
+						 {(\theta\theta'\sub{v}{e})(e_2\sub{x}{e_x})}
+	\end{align*}
+So,
+	$$
+	\issubref{\Gamma, \sub{x}{e_x}\Gamma',v:b}{e_1\sub{x}{e_x}}{e_2\sub{x}{e_x}}
+	$$
+And
+	$$
+	\issubtype{\Gamma, \sub{x}{e_x}\Gamma',v:b}{t_1\sub{x}{e_x}}{t_2\sub{x}{e_x}}
+	$$
+\item \rsubfun
+Assume
+	$$\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau_1}{\tau_2}$$
+where $\tau_1 \equiv \tfun{y}{\tau_y}{\tau}$
+and   $\tau_2 \equiv \tfun{y}{\tau'_y}{\tau'}$
+By inversion
+	$$
+	\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau'_y}{\tau_y}\ (1) \qquad
+	\issubtype{\Gamma, x\colon\tau_x, \Gamma',y\colon\tau'_y}{\tau}{\tau'}\ (2)
+	$$
+By IH	
+	$$
+	\issubtype{\Gamma, \sub{x}{e_x}\Gamma'}{\tau'_y\sub{x}{e_x}}{\tau_y\sub{x}{e_x}} \qquad
+	\issubtype{\Gamma, \sub{x}{e_x}\Gamma',y\colon\tau'_y\sub{x}{e_x}}{\tau\sub{x}{e_x}}{\tau'\sub{x}{e_x}}
+	$$
+By rule \rsubfun	
+	$$
+	\issubtype{\Gamma, \sub{x}{e_x}\Gamma'}{\tau_1\sub{x}{e_x}}{\tau_2\sub{x}{e_x}}
+	$$
+\end{itemize}
+
+$$
+\inference{
+	\issubref{\Gamma, v:b}{e_1}{e_2}
+}{
+	\issubtype{\Gamma}{\tref{v}{b}{e_1}}{\tref{v}{b}{e_2}}
+}[\rsubbase]
+\qquad
+\inference{
+	\issubtype{\Gamma}{\tau'_x}{\tau_x} &&
+	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'}
+}{
+	\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}
+}[\rsubfun]
+$$
+
+	
+	then
+	\issubtype{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau_1}{\sub{x}{e_x}\tau_2}
+\item \label{proof:sub:type} 
+Assume 
+	\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}.
+We will prove the lemma by induction on the derivation tree.
+\begin{itemize}
+\item \rtexact Assume
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+where $\tau \equiv \tref{v}{b}{v = e}$.
+By inversion we get
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tref{v}{b}{e'}}$$
+By IH
+	$$\hastype{\Gamma, \sub{x}{e_x} \Gamma'}{e\sub{x}{e_x}}{\tref{v}{b}{e'\sub{x}{e_x}}}$$
+By rule \rtexact
+	$$\hastype{\Gamma, \sub{x}{e_x} \Gamma'}{e\sub{x}{e_x}}{\tref{v}{b}{v = \sub{x}{e_x}}}$$
+Or
+	$$\hastype{\Gamma, \sub{x}{e_x} \Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+\item \rtvar Assume 
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+where $e \equiv y$.
+By inversion 
+$$(y,\tau )\in \Gamma, x\colon\tau_x, \Gamma'$$
+Assume
+$$(y,\tau)\in \Gamma$$
+By rule \rtvar
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e}{\tau}$$
+Since \iswellformed{}{\Gamma}, $x$ cannot appear in $\tau$
+so $\tau\sub{x}{e_x}\equiv\tau$.
+Also, $x\neq y$, so $e\sub{x}{e_x}\equiv e$.
+So,
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
+Assume
+$$(y,\tau) \equiv (x,\tau _x)$$
+By lemma's assumption 
+$$\hastype{\Gamma}{e_x}{\tau_x}$$
+so
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tau_x}$$
+Since $x = y$, $e\sub{x}{e_x} \equiv e_x$.
+Also, since $x \notin Dom(\Gamma)$ 
+it cannot appear in $\tau$,so
+$\tau\sub{x}{e_x} \equiv \tau \equiv \tau_x$.
+So,
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
+Otherwise, assume
+$$(y,\tau)\in \Gamma'$$
+So,
+$$(y,\sub{x}{e_x}\tau)\in \sub{x}{e_x}\Gamma'$$
+Also, $e\sub{x}{e_x}\equiv e \equiv y$.
+By which and rule \rtvar, we get
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
+\item \rtvarbase
+Assume 
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+where $e \equiv y$ and $\tau\equiv\tref{v}{b}{v=y}$.
+By inversion 
+$$(y,\tref{v}{b}{e'})\in \Gamma, x\colon\tau_x, \Gamma'$$
+Assume
+$$(y,\tau)\in \Gamma$$
+By rule \rtvarbase
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e}{\tau}$$
+Since \iswellformed{}{\Gamma}, $x$ cannot appear in $\tau$
+so $\tau\sub{x}{e_x}\equiv\tau$.
+Also, $x\neq y$, so $e\sub{x}{e_x}\equiv e$.
+So,
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
+Assume
+$$y \equiv x$$
+By lemma's assumption 
+$$\hastype{\Gamma}{e_x}{\tau_x}$$
+and since each expression has at most one unrefined type
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tref{v}{b}{e''}}$$
+By rule \rtexact we get
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tref{v}{b}{v = e_x}}$$
+Since $x = y$, $e\sub{x}{e_x} \equiv e_x$.
+Also, $\tref{v}{b}{v=y}\sub{x}{e_x}=\tref{v}{b}{v = e_x}$ 
+So,
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
+Otherwise, assume
+$$(y,\tau)\in \Gamma'$$
+So,
+$$(y,\sub{x}{e_x}\tau)\in \sub{x}{e_x}\Gamma'$$
+Also, $e\sub{x}{e_x}\equiv e \equiv y$ and $\tau\sub{x}{e_x} =\tau$.
+By which and rule \rtvar, we get
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
+\item\rtconst
+Assume 
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+where $e \equiv c$ and $\tau\equiv\ty{c}$.
+Since $e\sub{x}{e_x} \equiv e$ and $\tau\sub{x}{e_x}\equiv\tau$
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
+\item\rtsub
+Assume 
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+By inversion
+$$
+\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau'}\ (1)\qquad
+\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau'}{\tau} \ (2)\qquad
+\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau} \ (3)
+$$
+By IH, \ref{proof:sub:sub} and \ref{proof:sub:wf}
+$$
+\hastype{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}e}{\sub{x}{e_x}\tau'}\qquad
+\issubtype{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau'}{\sub{x}{e_x}\tau}
+$$
+$$
+\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau}
+$$
+By rule \rtsub
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+\item\rtfun
+Assume
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+where $e\equiv\efun{y}{e'}$ and $\tau\equiv\tfun{y}{\tau'_y}{\tau'}$.
+By inversion
+	$$
+	\hastype{\Gamma, x\colon\tau_x, \Gamma', y\colon\tau'_y}{e'}{\tau'}\ (1)\qquad
+	\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau'_y}\ (2)
+	$$
+By IH and \ref{proof:sub:wf}
+	$$
+	\hastype{\Gamma,\sub{x}{e_x} \Gamma', y\colon\sub{x}{e_x}\tau'_y}{\sub{x}{e_x}e'}{\sub{x}{e_x}\tau'} \qquad
+	\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau'_y}
+	$$
+	By rule \rtfun
+	$$
+	\hastype{\Gamma,\sub{x}{e_x} \Gamma'}{\sub{x}{e_x}e}{\sub{x}{e_x}\tau}
+	$$
+	
+\item\rtapp
+Assume
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+where $e\equiv\eapp{e_1}{e_2}$ and $\tau\equiv\tau'\sub{y}{e_2}$.
+By inversion
+	$$
+	\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e_1}{\tfun{y}{\tau'_y}{\tau'}}\ (1)\qquad
+	\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e_2}{{\tau'_y}}\ (2)
+	$$
+By IH 
+	$$
+	\hastype{\Gamma,\sub{x}{e_x} \Gamma'}{\sub{x}{e_x}e_1}{\sub{x}{e_x}\tfun{y}{\tau'_y}{\tau'}} \qquad
+	\hastype{\Gamma,\sub{x}{e_x} \Gamma'}{\sub{x}{e_x}e_2}{\sub{x}{e_x}{\tau'_y}}
+	$$
+	By rule \rtapp
+	$$
+	\hastype{\Gamma,\sub{x}{e_x} \Gamma'}{\sub{x}{e_x}e}{\sub{x}{e_x}\tau}
+	$$
+\end{itemize}
+\item \label{proof:sub:wf}
+Assume \iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau}.
+We will prove it by induction on the derivation.
+\begin{itemize}
+\item \rwbase
+Assume 
+$$\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau}$$
+where $\tau\equiv\tref{v}{b}{e}$.
+By inversion
+$$\hastype{\Gamma, x\colon\tau_x, \Gamma',v\colon b}{e}{\tbool}$$
+By \ref{proof:sub:type}
+$$\hastype{\Gamma, \sub{x}{e_x}(\Gamma',v\colon b)}{e\sub{x}{e_x}}{\tbool\sub{x}{e_x}}$$
+Equivalently
+$$\hastype{\Gamma, \sub{x}{e_x}\Gamma',v\colon b}{e\sub{x}{e_x}}{\tbool}$$
+By rule \rwbase
+$$\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\tref{v}{b}{e\sub{x}{e_x}}}$$
+Or 
+$$\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\tau\sub{x}{e_x}}$$
+\item \rwfun
+Assume
+$$\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau}$$
+where $\tau\equiv \tfun{y}{\tau'_y}{\tau'}$.
+By inversion, we get
+$$
+	\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau_x} \qquad
+	\iswellformed{\Gamma, x\colon\tau_x, \Gamma', y \colon \tau'_y}{\tau'}
+$$
+By IH
+$$
+	\iswellformed{\Gamma, \sub{x}{e_x} \Gamma'}{\tau_x\sub{x}{e_x}}\qquad
+	\iswellformed{\Gamma, \sub{x}{e_x}(\Gamma', y \colon \tau'_y)}{\tau'\sub{x}{e_x}}
+$$
+Due to $\alpha$-renaming, $x \neq y$, so
+$$
+	\iswellformed{\Gamma, \sub{x}{e_x} \Gamma'}{\tau'_y\sub{x}{e_x}}\qquad
+	\iswellformed{\Gamma, \sub{x}{e_x}\Gamma', y \colon \sub{x}{e_x}\tau'_y}{\tau'\sub{x}{e_x}}
+$$
+By \rwfun
+$$
+	\iswellformed{\Gamma, \sub{x}{e_x} \Gamma'}{\tfun{y}{\tau'_y\sub{x}{e_x}}{\tau'\sub{x}{e_x}}}
+$$
+Or
+$$
+	\iswellformed{\Gamma, \sub{x}{e_x} \Gamma'}{\tau\sub{x}{e_x}}
+$$
+\end{itemize}
+
+	then
+	\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau}
+\end{enumerate}

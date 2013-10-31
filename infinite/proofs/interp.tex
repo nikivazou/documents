@@ -86,6 +86,15 @@ $\eapp{e}{e_x} \in \interp{\tau'\sub{x}{e_x}}$.
 We will prove it by induction on the derivation tree.
 
 \begin{itemize}
+\item \rtexact Assume
+$$\hastype{\Gamma}{e}{\tau}$$
+where $\tau \equiv \tref{v}{b}{v = e}$.
+By inversion we have
+$$\hastype{\Gamma}{e}{\tref{v}{b}{e'}}$$
+We need to show that 
+$$	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ e \in \interp{\theta \ \tau}$$
+Which holds, as by definition of $=$
+$\generalconditionImplOne{(v = \theta\ e)\sub{v}{\theta\ e}}$
 \item\rtvar Assume
 $$	\hastype{\Gamma}{e}{\tau}$$
 where $e \equiv x$
