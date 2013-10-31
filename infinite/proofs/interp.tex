@@ -1,0 +1,186 @@
+\begin{enumerate}
+\item \label{proof:ssub} Assume \issubtype{\Gamma}{\tau_1}{\tau_2} 
+We will prove it by induction on the derivation tree:
+\begin{itemize}
+\item\rsubbase. We have
+$$\issubtype{\Gamma}{\tref{v}{b}{e_1}}{\tref{v}{b}{e_2}}$$
+By inversion we get 
+$$\issubref{\Gamma, v\colon b}{e_1}{e_2}$$
+By inversion of \rimpl we have
+$$	\forall \theta. \iswellformed{\Gamma, v\colon b}{\theta} \land
+	\generalconditionImpl{\theta\ e_1}{\theta\ e_2}
+(1)$$
+
+We want to prove 
+$$\sissubtype{\Gamma}{\tref{v}{b}{e_1}}{\tref{v}{b}{e_2}}$$
+Equivalently
+$$	
+	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow 
+	\interp{\theta\ \tref{v}{b}{e_1}} \subseteq \interp{\theta\ \tref{v}{b}{e_2}}
+$$
+Equivalently
+\begin{align*}
+	\forall \theta . \iswellformed{\Gamma}{\theta} \\& \Rightarrow 
+		\{e \mid \hastype{}{e}{b} 
+ 			\land 
+			\generalconditionInterp{e}{\theta\ e_1\sub{v}{e}} 
+		\}	
+	\\& \subseteq 
+		\{e \mid \hastype{}{e}{b} 
+			\land 
+			\generalconditionInterp{e}{\theta\ e_2\sub{v}{e}}
+		 \}	
+\end{align*}
+Since $e \in \interp{b}$, we have \iswellformed{\Gamma,v\colon b}{\theta,\sub{v}{e}}.
+So, from $(1)$ for $\theta := \theta,\sub{v}{e}$
+we have 
+$$	
+	\generalconditionImpl{\theta\ e_1\sub{v}{e}}{\theta\ e_2\sub{v}{e}}
+$$
+
+\item\rsubfun Assume
+$$\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}$$
+By inversion we have
+$$	\issubtype{\Gamma}{\tau'_x}{\tau_x} \qquad
+	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'}
+$$
+By IH
+$$	\sissubtype{\Gamma}{\tau'_x}{\tau_x} (1) \qquad
+	\sissubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'} (2)
+$$
+We want to show that 
+$$\sissubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}$$
+Equivalently
+$$	
+	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow 
+	\interp{\theta\ x:\tau_x \rightarrow \tau} 
+	\subseteq 
+	\interp{\theta\ x:\tau'_x \rightarrow \tau'}
+$$
+Equivalently
+\begin{align*}
+	\forall \theta &. \iswellformed{\Gamma}{\theta} \\&\Rightarrow 
+	\{e \mid \hastype{}{e}{\erase{\tau_x} \rightarrow \erase{\tau}} 
+	\land 
+	\forall e_x \in \interp{\tau_x}. \
+	 \eapp{e}{e_x} \in \interp{\tau\sub{x}{e_x}} 
+	 \}\\ &
+	\subseteq 
+	\{e \mid \hastype{}{e}{\erase{\tau'_x} \rightarrow \erase{\tau'}} 
+	\land 
+	\forall e_x \in \interp{\tau'_x}. \
+	 \eapp{e}{e_x} \in \interp{\tau'\sub{x}{e_x}} 
+	 \}
+\end{align*}
+The above holds, as for any $e, e_x$
+if $e_x \in \interp{\tau'}$
+then by $(1)$
+$e_x \in \interp{\tau}$.
+Also, by $(2)$
+if $\eapp{e}{e_x} \in \interp{\tau\sub{x}{e_x}}$
+then
+$\eapp{e}{e_x} \in \interp{\tau'\sub{x}{e_x}}$.
+\end{itemize}
+ 
+\item Assume \hastype{\Gamma}{e}{\tau}. 
+We will prove it by induction on the derivation tree.
+
+\begin{itemize}
+\item\rtvar Assume
+$$	\hastype{\Gamma}{e}{\tau}$$
+where $e \equiv x$
+By inversion we have
+$$(x,\tau) \in \Gamma$$
+We need to show that 
+$$	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ x \in \interp{\theta \ \tau}$$
+Which holds by the definition of well-formed substitutions
+\item\rtvarbase Assume
+$$\hastype{\Gamma}{e}{\tau}$$
+where $e\equiv x$ and $\tau\equiv\tref{v}{b}{v=x}$.
+By inversion
+$$(x,\tref{v}{b}{e_r}) \in \Gamma$$ 
+We need to show that 
+$$	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ x \in \interp{\theta \ \tau}$$
+Equivalently that 
+$$\forall e.
+ e\in\interp{\tref{v}{b}{e_r}} \Rightarrow e \in \interp{\tref{v}{b}{v = e}}$$
+which holds, as by the definition of $=$
+$$\generalconditionImplOne{e=e}$$
+\item\rtconst Assume
+$$\hastype{\Gamma}{e}{\tau}$$
+where $e \equiv c$ and $\tau\equiv\ty{c}$.
+Then \shastype{\Gamma}{e}{\tau} holds by the definition of constants.
+\item\rtsub Assume 
+$$	\hastype{\Gamma}{e}{\tau}$$
+By inversion
+$$
+	\hastype{\Gamma}{e}{\tau'}\ (1) \qquad
+	\issubtype{\Gamma}{\tau'}{\tau}\ (2) \qquad
+	\iswellformed{\Gamma}{\tau}\ (3)
+$$
+By IH on $(1)$ we have
+$$	\shastype{\Gamma}{e}{\tau'}\ (4)$$
+By \ref{proof:ssub} on $(2)$ we have
+$$	\sissubtype{\Gamma}{\tau'}{\tau}\ (5)$$
+By $(4)$ and $(5)$ we get
+$$	\shastype{\Gamma}{e}{\tau}$$
+\item\rtfun Assume
+$$	\hastype{\Gamma}{e}{\tau}$$
+where $e \equiv \efun{x}{e'}$ and 
+$\tau \equiv\tfun{x}{\tau'_x}{\tau'}$.
+By inversion we get
+$$
+	\hastype{\Gamma, x\colon\tau'_x}{e'}{\tau'}\ (1) \qquad
+	\iswellformed{\Gamma}{\tau'_x}\ (2)
+$$
+By IH on $(1)$ we have
+$$
+	\shastype{\Gamma, x\colon\tau'_x}{e'}{\tau'}\ (3)
+$$
+Equivalently
+$$	
+\forall \theta . \iswellformed{(\Gamma,x\colon\tau'_x)}{(\theta\sub{x}{e_x})} 
+	\Rightarrow (\theta\sub{x}{e_x})\ e' \in \interp{(\theta\sub{x}{e_x}) \ \tau'}\\
+$$
+Or
+$$	
+\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow
+\forall e_x . e_x \in \interp{\tau'_x} \Rightarrow
+	\theta\ \eapp{e}{e_x} \in \interp{\theta \ (\tau'\sub{x}{e_x})}\\
+$$
+Moreover, $\hastype{e}{\erase{\tau'_x}\rightarrow{\erase{\tau}}}$.
+So,
+$$	
+\forall \theta . \iswellformed{\Gamma}{\theta}\ \theta\ e\in \interp{\theta\ \tau}
+$$
+Or, $$\shastype{\Gamma}{e}{\tau}$$
+\item\rtapp
+Assume
+$$\hastype{\Gamma}{e}{\tau}$$
+where $e\equiv\eapp{e_1}{e_2}$ and $\tau\equiv\tau'\sub{x}{e_2}$.
+By inversion:
+$$
+	\hastype{\Gamma}{e_1}{(\tfun{x}{\tau'_{x}}{\tau'})}\ (1)\qquad
+	\hastype{\Gamma}{e_2}{\tau'_{x}}\ (2)
+$$
+By IH we get
+$$
+	\shastype{\Gamma}{e_1}{(\tfun{x}{\tau'_{x}}{\tau'})}\ (3)\qquad
+	\shastype{\Gamma}{e_2}{\tau'_{x}}\ (4)
+$$
+So 
+$$\forall \theta. \iswellformed{\Gamma}{\theta}\Rightarrow
+\forall e_x \in \interp{\theta\ \tau'_x} \Rightarrow
+	\eapp{(\theta e_1)}{e_x} \in \interp{\theta\ \tau'\sub{x}{e_x}}
+\ (5)$$
+and
+$$\forall \theta. \iswellformed{\Gamma}{\theta}\Rightarrow
+	\theta\ e_2 \in \interp{\theta\ \tau'_x}
+\ (6)$$
+From $(5)$ and $(6)$, we get
+$$\forall \theta. \iswellformed{\Gamma}{\theta}\Rightarrow
+	\theta\ e \in \interp{\theta\ \tau}
+$$
+Or $$\shastype{\Gamma}{e}{\tau}$$
+\end{itemize}
+\end{enumerate}

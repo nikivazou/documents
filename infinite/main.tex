@@ -4,12 +4,28 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{commands}
+\usepackage{xspace}
 \usepackage[inference]{semantic}
 \include{haskellListings}
+\usepackage{amsthm}
 
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
 
+%% RULE NAMES
+\newcommand\rulename[1]{\textsc{#1}\xspace}
+
+\newcommand\rsubbase{\ensuremath{\preceq}\rulename{-Base}}
+\newcommand\rsubfun{\ensuremath{\preceq}\rulename{-Fun}}
+
+\newcommand\rtvar{\rulename{T-Var}}
+\newcommand\rtvarbase{\rulename{T-Var-Base}}
+\newcommand\rtconst{\rulename{T-Const}}
+\newcommand\rtsub{\rulename{T-Sub}}
+\newcommand\rtfun{\rulename{T-Fun}}
+\newcommand\rtapp{\rulename{T-App}}
+
+\newcommand\rimpl{\ensuremath{\Rightarrow}\rulename{-Base}}
 
 
 %% EXPRESSIONS
@@ -29,8 +45,32 @@
 \newcommand\tfun[3]{\ensuremath{#1\colon #2 \rightarrow #3}}
 
 %% OTHER
-\newcommand\valid[1]{\ensuremath{\text{Valid}\ (#1)}}
+\newcommand\validn[2]{\ensuremath{\text{Valid}_{#2}\ (#1)}}
+\newcommand\finn[2]{\ensuremath{\text{Fin}_{#2}\ (#1)}}
+\newcommand\validi[1]{\ensuremath{\text{Valid}_{i}\ (#1)}}
+\newcommand\fini[1]{\ensuremath{\text{Fin}_{i}\ (#1)}}
 \newcommand\fin[1]{\ensuremath{\text{Fin}\ (#1)}}
+
+\newcommand\valid[1]{\ensuremath{\text{Valid}(#1)}}
+
+% \newcommand\generalconditionInterp[2]{\ensuremath{\fin{#1} \Rightarrow \valid{#2}}}
+% \newcommand\generalconditionImpl[2]{\ensuremath{\valid{#1} \Rightarrow \valid{#2}}}
+% \newcommand\generalconditionImplOne[2]{\ensuremath{\valid{#1}}}
+
+\newcommand\generalconditionInterp[2]
+	{\ensuremath{\fin{#1} \land (\forall i. \fini{#1} \Rightarrow \validi{#2})}}
+\newcommand\generalconditionImpl[2]
+	{\ensuremath{\forall i . \validi{#1} \Rightarrow \validi{#2}}}
+\newcommand\generalconditionImplOne[1]
+	{\ensuremath{\forall i . \validi{#1}}}
+
+%% general condition interp can be any condition in which 
+%% the second argument appears in positive places
+
+
+
+%OTHER
+\newcommand\ty[1]{\ensuremath{\text{ty}({#1})}}
 \newcommand\sub[2]{\ensuremath{\left[ #2 / #1 \right]}}
 \newcommand\erase[1]{\ensuremath{\lfloor #1 \rfloor}}
 
@@ -87,16 +127,6 @@ $$
 $$
 
 
-\section*{Operational Semantic}
-
-$$
-\begin{array}{ll}
-\eval{\eapp{e_1}{e_2}}{\eapp{e_1'}{e_2}} & \text{if } \eval{e_1}{e_1'}\\
-\eval{\eapp{\efun{x}{e}}{e_x}}{e\sub{x}{e_x}} &\\
-\eval{\eapp{c}{e}}{\eapp{c}{e'}} & \text{if } \eval{e}{e'}\\
-\eval{\eapp{c}{v}}{[|c|](v)}
-\end{array}
-$$
 
 \section*{Erasing}
 \begin{align*}
@@ -104,17 +134,17 @@ $$
 \erase{\tfun{x}{\tau_x}{\tau}}&= \erase{\tau_x} \rightarrow \erase{\tau}
 \end{align*}
 
-\section*{Interpretations}
-$$\valid{e} \Leftrightarrow \evals{e}{v}\Rightarrow\evals{e}{\etrue}$$
 
+
+\section*{Interpretations}
 \begin{align*}
 \interp{\tref{v}{b}{e_v}} &= 
 	\{e \mid \hastype{}{e}{b} 
 	\land 
-	\evals{e}{v_e} \Rightarrow 
-	\valid{e_v\sub{v}{e}} \}\\
+	\generalconditionInterp{e}{e_v\sub{v}{e}} 
+	\}\\
 \interp{\tfun{x}{\tau_x}{\tau}} &= 
-	\{e \mid \hastype{}{e}{\erase{\tau} \rightarrow \erase{\tau_x}} 
+	\{e \mid \hastype{}{e}{\erase{\tau_x} \rightarrow \erase{\tau}} 
 	\land 
 	\forall e_x \in \interp{\tau_x}. \
 	 \eapp{e}{e_x} \in \interp{\tau\sub{x}{e_x}} 
@@ -129,26 +159,32 @@ $$\valid{e} \Leftrightarrow \evals{e}{v}\Rightarrow\evals{e}{\etrue}$$
 %% You can fake it: every time you add a
 %% binding to env it should have 	v = x
 %% then I get this by implication
+%\rtvar
+%\rtvarbase
+%\rtconst
+%\rtsub
+%\rtfun
+%\rtapp
 
 $$
 \inference{
 	(x,\tref{v}{b}{e}) \in \Gamma
 }{
 	\hastype{\Gamma}{x}{\tref{v}{b}{v=x}}
-}
+}[\rtvarbase]
 \qquad
 \inference{
 	(x,\tau) \in \Gamma &&
 	\tau \equiv \tfun{x'}{\tau_x'}{\tau'}
 }{
 	\hastype{\Gamma}{x}{\tau}
-}
+}[\rtvar]
 $$
 $$
 \inference{
 }{
-	\hastype{\Gamma}{c}{ty(c)}
-}
+	\hastype{\Gamma}{c}{\ty{c}}
+}[\rtconst]
 \qquad
 \inference{
 	\hastype{\Gamma}{e}{\tau'} &&
@@ -156,7 +192,7 @@ $$
 	\iswellformed{\Gamma}{\tau} &&
 }{
 	\hastype{\Gamma}{e}{\tau}
-}
+}[\rtsub]
 $$
 $$
 \inference{
@@ -164,14 +200,14 @@ $$
 	\iswellformed{\Gamma}{\tau_x}
 }{
 	\hastype{\Gamma}{\efun{x}{e}}{(\tfun{x}{\tau_x}{\tau})}
-}
+}[\rtfun]
 \qquad
 \inference{
 	\hastype{\Gamma}{e_1}{(\tfun{x}{\tau_{x}}{\tau})} &&
 	\hastype{\Gamma}{e_2}{\tau_{x}}
 }{
 	\hastype{\Gamma}{\eapp{e_1}{e_2}}{\tau\sub{x}{e_2}}
-}
+}[\rtapp]
 $$
 
 
@@ -197,24 +233,24 @@ $$
 	\issubref{\Gamma, v:b}{e_1}{e_2}
 }{
 	\issubtype{\Gamma}{\tref{v}{b}{e_1}}{\tref{v}{b}{e_2}}
-}
+}[\rsubbase]
 \qquad
 \inference{
 	\issubtype{\Gamma}{\tau'_x}{\tau_x} &&
 	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'}
 }{
 	\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}
-}
+}[\rsubfun]
 $$
 
 \hfill\mbox{\issubref{\Gamma}{e}{e}}
 $$
 \inference{
 	\forall \theta. \iswellformed{\Gamma}{\theta} \land
-	\valid{\theta\ e_1} \Rightarrow \valid{\theta\ e_2}
+	\generalconditionImpl{\theta\ e_1}{\theta\ e_2}
 }{
 	\issubref{\Gamma}{e_1}{e_2}
-}
+}[\rimpl]
 $$
 
 
@@ -233,14 +269,16 @@ $$
 \section*{Constants}
 For each constant $c$, 
 \begin{enumerate}
-\item \hastype{\emptyset}{c}{ty(c)}
-\item If $ty(c) = \tfun{x}{\tau_x}{\tau}$, then for each $v$ such that
+\item \hastype{\emptyset}{c}{\ty{c}}
+\item If $\ty{c} = \tfun{x}{\tau_x}{\tau}$, then for each $v$ such that
 \hastype{\emptyset}{v}{\tau_x} $\interp{c}(v)$ is defined and
 \hastype{}{\interp{c}(v)}{\tau\sub{x}{v}}
-\item If $ty(c) = \tref{v}{b}{e}$, 
-then \evals{e\sub{v}{c}}{\etrue} and $\forall c'\ c' \neq c. \lnot (\evals{e\sub{v}{c'}}{\etrue})$ 
+\item If $\ty{c} = \tref{v}{b}{e}$, 
+then \generalconditionInterp{c}{e\sub{v}{c}} and 
+$\forall c'\ c' \neq c. \lnot (\generalconditionInterp{c}{e\sub{v}{c'}})$ 
 \end{enumerate}
-
+Moreover, $=$ is a constant and for any expression $e$ we have 
+$$\generalconditionImplOne{e = e}$$
 
 \section*{Semantic Typing}
 \begin{align*}
@@ -257,10 +295,9 @@ then \evals{e\sub{v}{c}}{\etrue} and $\forall c'\ c' \neq c. \lnot (\evals{e\sub
 \item If \hastype{\Gamma}{e}{\tau} then \shastype{\Gamma}{e}{\tau} 
 \end{enumerate}
 \end{lemma}
-
-\begin{lemma}
-If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}
-\end{lemma}
+\begin{proof}
+\input{proofs/interp.tex}
+\end{proof}
 
 
 \begin{lemma}[Substitution]
@@ -282,6 +319,12 @@ If \hastype{\Gamma}{e_x}{\tau_x}, then
 \end{lemma}
 
 
+\begin{lemma}
+If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}
+\end{lemma}
+
+
+
 \begin{lemma}[Preservation]
 If \hastype{\Gamma}{e}{\tau} and \eval{e}{e'} then \hastype{\Gamma}{e'}{\tau}.
 \end{lemma}
@@ -300,6 +343,22 @@ If \hastype{\emptyset}{e}{\tau} and $e \neq v$ then there exists an $e'$ such th
 \interp{c}&=c &&&
 \interp{\eapp{e_1}{e_2}}&=\interp{e_1}(\interp{e_2})\\
 \end{align*}
+
+
+\section*{Operational Semantic}
+
+$$
+\begin{array}{ll}
+\eval{\eapp{e_1}{e_2}}{\eapp{e_1'}{e_2}} & \text{if } \eval{e_1}{e_1'}\\
+\eval{\eapp{\efun{x}{e}}{e_x}}{e\sub{x}{e_x}} &\\
+\eval{\eapp{c}{e}}{\eapp{c}{e'}} & \text{if } \eval{e}{e'}\\
+\eval{\eapp{c}{v}}{[|c|](v)}
+\end{array}
+$$
+
+\section*{Interpretations}
+$$\valid{e} \Leftrightarrow \evals{e}{v}\Rightarrow\evals{e}{\etrue}$$
+
 
 \begin{claim}
 $$
