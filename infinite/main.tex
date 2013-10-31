@@ -326,9 +326,10 @@ $$\generalconditionImplOne{e = e}$$
 \end{enumerate}
 \end{lemma}
 \showproof{
-\begin{proof}
-\input{proofs/interp}
-\end{proof}}
+	\begin{proof}
+	\input{proofs/interp}
+	\end{proof}
+}
 
 
 \begin{lemma}[Substitution]
@@ -348,10 +349,11 @@ If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{\Gamma, x\colon\tau_x ,\Gamma
 	\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau}
 \end{enumerate}
 \end{lemma}
-\begin{proof}
-\input{proofs/substitution}
-\end{proof}
-
+\showproof{
+	\begin{proof}
+	\input{proofs/substitution}
+	\end{proof}
+}
 \begin{lemma}
 If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}
 \end{lemma}
