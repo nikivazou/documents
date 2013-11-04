@@ -13,8 +13,8 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
 
-\newcommand\showproof[1]{#1}
-%\newcommand\showproof[1]{\texttt{proved}}
+%\newcommand\showproof[1]{#1}
+\newcommand\showproof[1]{\texttt{proved}}
 
 %% RULE NAMES
 \newcommand\rulename[1]{\textsc{#1}\xspace}
@@ -310,7 +310,7 @@ $$
 \begin{definition}\label{def:constants}
 For each constant $c$, 
 \begin{enumerate}
-\item \hastype{\emptyset}{c}{\ty{c}}
+\item \hastype{\emptyset}{c}{\ty{c}} and \iswellformed{}{\ty{c}}
 \item If $\ty{c} = \tfun{x}{\tau_x}{\tau}$, then for each $v$ such that
 \hastype{\emptyset}{v}{\tau_x} $\interp{c}(v)$ is defined and
 \hastype{}{\interp{c}(v)}{\tau\sub{x}{v}}
@@ -384,7 +384,7 @@ then \hastypebase{\erase{\Gamma}}{e}{\erase{\tau}}.
 \begin{lemma}\label{lemma:wellformed}
 If \iswellformed{}{\Gamma} and \hastype{\Gamma}{e}{\tau} then \iswellformed{\Gamma}{\tau}.
 \end{lemma}
-{%\showproof{
+\showproof{
 	\begin{proof}
 	\input{proofs/wellformed}
 	\end{proof}

@@ -1,0 +1,116 @@
+Assume
+\iswellformed{}{\Gamma} and \hastype{\Gamma}{e}{\tau}.
+We will prove the Lemma by induction on the derivation tree.
+\begin{itemize}
+\item Case \rtexact. Assume 
+$$	\hastype{\Gamma}{e}{\tau} $$
+where $\tau\equiv\tref{v}{b}{v \eqb{b} e}$.
+By inversion
+$$	
+\hastype{\Gamma}{e}{\tref{v}{b}{e'}}
+$$
+By Lemma \ref{lemma:erase}
+$$	
+\hastypebase{\erase{\Gamma}}{e}{b}
+$$
+By Definition \ref{def:constants}
+$$	
+\hastypebase{\erase{\Gamma},v\colon b}{v \eqb{b} e}{\tbool}
+$$
+So, 
+$$	
+\iswellformed{\Gamma}{\tau}
+$$
+
+\item Case \rtvarbase
+Assume 
+$$	\hastype{\Gamma}{e}{\tau} $$
+where $\tau\equiv\tref{v}{b}{v \eqb{b} x}$.
+By inversion
+$$	
+(x,{\tref{v}{b}{e'}}) \in \Gamma
+$$
+
+So, 
+$$	
+(x,b) \in \erase{\Gamma}
+$$
+Or,
+$$	
+\hastypebase{\erase{\Gamma}}{x}{b}
+$$
+By Definition \ref{def:constants}
+$$	
+\hastypebase{\erase{\Gamma},v\colon b}{v \eqb{b} x}{\tbool}
+$$
+So, 
+$$	
+\iswellformed{\Gamma}{\tau}
+$$
+\item Case \rtvar
+Assume $$\hastype{\Gamma}{e}{\tau}$$
+By inversion $(x,\tau)\in \Gamma$ and since \iswellformed{}{\Gamma}
+$$	
+\iswellformed{\Gamma}{\tau}
+$$
+\item Case \rtconst
+Assume $$\hastype{\Gamma}{e}{\tau}$$
+where $e\equiv c$ and $\tau\equiv\ty{c}$.
+By Definition \ref{def:constants},
+\iswellformed{\Gamma}{\ty{c}}
+
+\item Case \rtsub.
+Assume 
+$$	
+	\hastype{\Gamma}{e}{\tau}
+$$
+By inversion
+$$	\iswellformed{\Gamma}{\tau}
+$$
+
+\item Case \rtfun.
+Assume
+$$
+	\hastype{\Gamma}{e}{\tau}
+$$
+where $\tau\equiv\tfun{x}{\tau_x}{\tau'}$ 
+and $e\equiv\efun{x}{e_x}$.
+
+By inversion
+$$
+	\hastype{\Gamma, x\colon\tau_x}{e}{\tau'} \ (1) \qquad
+	\iswellformed{\Gamma}{\tau_x}\ (2)
+$$
+By IH on $(1)$
+$$
+	\iswellformed{\Gamma, x\colon\tau_x}{\tau'}
+$$
+By which, $(2)$ and rule \rwfun
+$$
+	\iswellformed{\Gamma}{\tau}
+$$
+
+\item Case \rtapp. Assume
+$$
+	\hastype{\Gamma}{e}{\tau}
+$$
+where $\tau\equiv\tau'\sub{x}{e_2}$ 
+and $e\equiv\eapp{e_1}{e_2}$.
+By inversion
+$$
+	\hastype{\Gamma}{e_1}{(\tfun{x}{\tau_{x}}{\tau'})}\ (1) \qquad 
+	\hastype{\Gamma}{e_2}{\tau_{x}}\ (2)
+$$
+By IH on $(1)$
+$$
+	\iswellformed{\Gamma}{(\tfun{x}{\tau_{x}}{\tau'})}
+$$
+By inversion on \rtapp
+$$
+	\iswellformed{\Gamma, x\colon\tau_x}{\tau'}
+$$
+By which, $(2)$ and Lemma \ref{lemma:substitution}
+$$
+	\iswellformed{\Gamma}{\tau}
+$$
+\end{itemize}
