@@ -13,7 +13,8 @@
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
 
-\newcommand\showproof[1]{\texttt{proved}}
+\newcommand\showproof[1]{#1}
+%\newcommand\showproof[1]{\texttt{proved}}
 
 %% RULE NAMES
 \newcommand\rulename[1]{\textsc{#1}\xspace}
@@ -53,6 +54,9 @@
 \newcommand\tfun[3]{\ensuremath{#1\colon #2 \rightarrow #3}}
 
 %% OTHER
+\newcommand\eqb[1]{\ensuremath{=_{#1}}}
+\newcommand\eq{\eqb{}}
+
 \newcommand\validn[2]{\ensuremath{\text{Valid}_{#2}\ (#1)}}
 \newcommand\finn[2]{\ensuremath{\text{Fin}_{#2}\ (#1)}}
 \newcommand\validi[1]{\ensuremath{\text{Valid}_{i}\ (#1)}}
@@ -86,6 +90,7 @@
 \newcommand\eval[2]{\ensuremath{#1 \hookrightarrow #2}}
 \newcommand\evals[2]{\ensuremath{#1 \hookrightarrow^\star #2}}
 \newcommand\hastype[3]{\ensuremath{#1 \vdash #2 \colon #3}}
+\newcommand\hastypebase[3]{\ensuremath{#1 \vdash_B #2 \colon #3}}
 \newcommand\shastype[3]{\ensuremath{#1 \vdash #2 \in #3}}
 \newcommand\iswellformed[2]{\ensuremath{#1 \vdash #2}}
 \newcommand\biswellformed[2]{\ensuremath{#1 \vdash_B #2}}
@@ -142,6 +147,10 @@ $$
 \erase{\tfun{x}{\tau_x}{\tau}}&= \erase{\tau_x} \rightarrow \erase{\tau}
 \end{align*}
 
+\begin{align*}
+\erase{\emptyset}&=\emptyset\\
+\erase{x\colon\tau, \Gamma}&= x\colon\erase{\tau},\erase{\Gamma}
+\end{align*}
 
 \section*{Substitutions}
 \begin{align*}
@@ -183,14 +192,14 @@ $$
 \inference{
 	\hastype{\Gamma}{e}{\tref{v}{b}{e'}}
 }{
-	\hastype{\Gamma}{e}{\tref{v}{b}{v = e}}
+	\hastype{\Gamma}{e}{\tref{v}{b}{v \eqb{b} e}}
 }[\rtexact]
 $$
 $$
 \inference{
 	(x,\tref{v}{b}{e}) \in \Gamma
 }{
-	\hastype{\Gamma}{x}{\tref{v}{b}{v=x}}
+	\hastype{\Gamma}{x}{\tref{v}{b}{v \eqb{b} x}}
 }[\rtvarbase]
 \qquad
 \inference{
@@ -234,7 +243,7 @@ $$
 \hfill\mbox{\iswellformed{\Gamma}{\tau}}
 $$
 \inference{
-	\hastype{\Gamma, v\colon b}{e}{\tbool}
+	\hastypebase{\erase{\Gamma}, v\colon b}{e}{\tbool}
 }{
 	\iswellformed{\Gamma}{\tref{v}{b}{e}}
 }[\rwbase]
@@ -309,8 +318,13 @@ For each constant $c$,
 then \generalconditionInterp{c}{e\sub{v}{c}} and 
 $\forall c'\ c' \neq c. \lnot (\generalconditionInterp{c}{e\sub{v}{c'}})$ 
 \end{enumerate}
-Moreover, $=$ is a constant and for any expression $e$ we have 
-$$\generalconditionImplOne{e = e}$$
+Moreover, for any base type $b$ \eq{b} is a constant and 
+\begin{itemize}
+\item For any expression $e$ we have 
+$$\generalconditionImplOne{e \eqb{b} e}$$
+\item For any base type $b$ 
+$$\ty{=_b} \equiv \tfun{x}{b}{\tfun{y}{b}{\tbool}}$$
+\end{itemize}
 \end{definition}
 
 \section*{Semantic Typing}
@@ -361,9 +375,20 @@ If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{}{\Gamma, x\colon\tau_x ,\Gam
 If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}.
 \end{lemma}
 
+\begin{lemma}\label{lemma:erase} % for \ref{lemma:wellformed}
+If \hastype{\Gamma}{e}{\tau} 
+then \hastypebase{\erase{\Gamma}}{e}{\erase{\tau}}.
+\end{lemma}
+
+
 \begin{lemma}\label{lemma:wellformed}
 If \iswellformed{}{\Gamma} and \hastype{\Gamma}{e}{\tau} then \iswellformed{\Gamma}{\tau}.
 \end{lemma}
+{%\showproof{
+	\begin{proof}
+	\input{proofs/wellformed}
+	\end{proof}
+}
 
 
 \begin{lemma}[Preservation]\label{lemma:preservation}

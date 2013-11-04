@@ -2,20 +2,20 @@ Assume \hastype{\emptyset}{e}{\tau} and \eval{e}{e'}.
 We will prove the lemma by induction on the derivation tree. 
 \begin{itemize}
 \item Case \rtexact. Assume $$\hastype{\emptyset}{e}{\tau}\ (1)$$
-where $\tau \equiv\tref{v}{b}{v = e}$.
+where $\tau \equiv\tref{v}{b}{v \eqb{b} e}$.
 
 By inversion
 $$\hastype{\emptyset}{e}{\tref{v}{b}{e_v}}$$
 By IH
 $$\hastype{\emptyset}{e'}{\tref{v}{b}{e_v}}$$
 By rule \rtexact
-$$\hastype{\emptyset}{e'}{\tref{v}{b}{v=e'}} \ (2)$$
+$$\hastype{\emptyset}{e'}{\tref{v}{b}{v\eqb{b} e'}} \ (2)$$
 By Lemma \ref{lemma:eval}
-$$\issubtype{\emptyset}{\tref{v}{b}{v=e'}}{\tref{v}{b}{v=e}} \ (3)$$
-By Lemma \ref{lemma:wellformed} on $(1)$
-$$\iswellformed{\emptyset}{\tref{v}{b}{v=e}} \ (4)$$
+$$\issubtype{\emptyset}{\tref{v}{b}{v\eqb{b} e'}}{\tref{v}{b}{v\eqb{b} e}} \ (3)$$
+By Lemma \ref{lemma:wellformed} on $(1)$ (since \iswellformed{}{\emptyset})
+$$\iswellformed{\emptyset}{\tref{v}{b}{v\eqb{b} e}} \ (4)$$
 By $(2), (3), (4)$ and rule \rtsub:
-$$\hastype{\emptyset}{e'}{\tref{v}{b}{v=e}}$$
+$$\hastype{\emptyset}{e'}{\tref{v}{b}{v\eqb{b} e}}$$
 
 \item Cases \rtvarbase, \rtvar, \rtconst and \rtfun trivially hold
        as there is no $e'$ such that \eval{e}{e'}.
@@ -64,7 +64,7 @@ By Lemma \ref{lemma:eval}
 $$
 	\issubtype{\emptyset}{\tau'\sub{x}{e_2'}}{\tau'\sub{x}{e_2}}\ (5)
 $$
-By $(1)$ and Lemma \ref{lemma:wellformed}
+By $(1)$ and Lemma \ref{lemma:wellformed}, since \iswellformed{}{\emptyset}
 $$
 	\iswellformed{\emptyset}{\tau'\sub{x}{e_2}}\ (6)
 $$

@@ -88,13 +88,13 @@ We will prove it by induction on the derivation tree.
 \begin{itemize}
 \item \rtexact Assume
 $$\hastype{\Gamma}{e}{\tau}$$
-where $\tau \equiv \tref{v}{b}{v = e}$.
+where $\tau \equiv \tref{v}{b}{v \eqb{b} e}$.
 By inversion we have
 $$\hastype{\Gamma}{e}{\tref{v}{b}{e'}}$$
 We need to show that 
 $$	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ e \in \interp{\theta \ \tau}$$
-Which holds, as by definition of $=$
-$\generalconditionImplOne{(v = \theta\ e)\sub{v}{\theta\ e}}$
+Which holds, as by definition of \eqb{b}
+$\generalconditionImplOne{(v \eqb{b} \theta\ e)\sub{v}{\theta\ e}}$
 \item\rtvar Assume
 $$	\hastype{\Gamma}{e}{\tau}$$
 where $e \equiv x$
@@ -105,16 +105,16 @@ $$	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ x \in \int
 Which holds by the definition of well-formed substitutions
 \item\rtvarbase Assume
 $$\hastype{\Gamma}{e}{\tau}$$
-where $e\equiv x$ and $\tau\equiv\tref{v}{b}{v=x}$.
+where $e\equiv x$ and $\tau\equiv\tref{v}{b}{v\eqb{b}x}$.
 By inversion
 $$(x,\tref{v}{b}{e_r}) \in \Gamma$$ 
 We need to show that 
 $$	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ x \in \interp{\theta \ \tau}$$
 Equivalently that 
 $$\forall e.
- e\in\interp{\tref{v}{b}{e_r}} \Rightarrow e \in \interp{\tref{v}{b}{v = e}}$$
-which holds, as by the definition of $=$
-$$\generalconditionImplOne{e=e}$$
+ e\in\interp{\tref{v}{b}{e_r}} \Rightarrow e \in \interp{\tref{v}{b}{v \eqb{b} e}}$$
+which holds, as by the definition of \eqb{b}
+$$\generalconditionImplOne{e\eqb{b}e}$$
 \item\rtconst Assume
 $$\hastype{\Gamma}{e}{\tau}$$
 where $e \equiv c$ and $\tau\equiv\ty{c}$.

@@ -87,13 +87,13 @@ We will prove the lemma by induction on the derivation tree.
 \begin{itemize}
 \item \rtexact Assume
 	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
-where $\tau \equiv \tref{v}{b}{v = e}$.
+where $\tau \equiv \tref{v}{b}{v \eqb{b} e}$.
 By inversion we get
 	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tref{v}{b}{e'}}$$
 By IH
 	$$\hastype{\Gamma, \sub{x}{e_x} \Gamma'}{e\sub{x}{e_x}}{\tref{v}{b}{e'\sub{x}{e_x}}}$$
 By rule \rtexact
-	$$\hastype{\Gamma, \sub{x}{e_x} \Gamma'}{e\sub{x}{e_x}}{\tref{v}{b}{v = \sub{x}{e_x}}}$$
+	$$\hastype{\Gamma, \sub{x}{e_x} \Gamma'}{e\sub{x}{e_x}}{\tref{v}{b}{v \eqb{b} \sub{x}{e_x}}}$$
 Or
 	$$\hastype{\Gamma, \sub{x}{e_x} \Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
 \item \rtvar Assume 
@@ -135,7 +135,7 @@ $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
 \item \rtvarbase
 Assume 
 	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
-where $e \equiv y$ and $\tau\equiv\tref{v}{b}{v=y}$.
+where $e \equiv y$ and $\tau\equiv\tref{v}{b}{v\eqb{b} y}$.
 By inversion 
 $$(y,\tref{v}{b}{e'})\in \Gamma, x\colon\tau_x, \Gamma'$$
 Assume
@@ -155,9 +155,9 @@ $$\hastype{\Gamma}{e_x}{\tau_x}$$
 and since each expression has at most one unrefined type
 $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tref{v}{b}{e''}}$$
 By rule \rtexact we get
-$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tref{v}{b}{v = e_x}}$$
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tref{v}{b}{v \eqb{b} e_x}}$$
 Since $x = y$, $e\sub{x}{e_x} \equiv e_x$.
-Also, $\tref{v}{b}{v=y}\sub{x}{e_x}=\tref{v}{b}{v = e_x}$ 
+Also, $\tref{v}{b}{v=y}\sub{x}{e_x}=\tref{v}{b}{v \eqb{b} e_x}$ 
 So,
 $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
 
@@ -242,11 +242,9 @@ Assume
 $$\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau}$$
 where $\tau\equiv\tref{v}{b}{e}$.
 By inversion
-$$\hastype{\Gamma, x\colon\tau_x, \Gamma',v\colon b}{e}{\tbool}$$
-By \ref{proof:sub:type}
-$$\hastype{\Gamma, \sub{x}{e_x}(\Gamma',v\colon b)}{e\sub{x}{e_x}}{\tbool\sub{x}{e_x}}$$
-Equivalently
-$$\hastype{\Gamma, \sub{x}{e_x}\Gamma',v\colon b}{e\sub{x}{e_x}}{\tbool}$$
+$$\hastypebase{\erase{\Gamma, x\colon\tau_x, \Gamma'},v\colon b}{e}{\tbool}$$
+So,
+$$\hastypebase{\erase{\Gamma, \sub{x}{e_x}\Gamma'},v\colon b}{e\sub{x}{e_x}}{\tbool}$$
 By rule \rwbase
 $$\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\tref{v}{b}{e\sub{x}{e_x}}}$$
 Or 
