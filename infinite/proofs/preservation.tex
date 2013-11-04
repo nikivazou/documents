@@ -1,0 +1,93 @@
+Assume \hastype{\emptyset}{e}{\tau} and \eval{e}{e'}. 
+We will prove the lemma by induction on the derivation tree. 
+\begin{itemize}
+\item Case \rtexact. Assume $$\hastype{\emptyset}{e}{\tau}\ (1)$$
+where $\tau \equiv\tref{v}{b}{v = e}$.
+
+By inversion
+$$\hastype{\emptyset}{e}{\tref{v}{b}{e_v}}$$
+By IH
+$$\hastype{\emptyset}{e'}{\tref{v}{b}{e_v}}$$
+By rule \rtexact
+$$\hastype{\emptyset}{e'}{\tref{v}{b}{v=e'}} \ (2)$$
+By Lemma \ref{lemma:eval}
+$$\issubtype{\emptyset}{\tref{v}{b}{v=e'}}{\tref{v}{b}{v=e}} \ (3)$$
+By Lemma \ref{lemma:wellformed} on $(1)$
+$$\iswellformed{\emptyset}{\tref{v}{b}{v=e}} \ (4)$$
+By $(2), (3), (4)$ and rule \rtsub:
+$$\hastype{\emptyset}{e'}{\tref{v}{b}{v=e}}$$
+
+\item Cases \rtvarbase, \rtvar, \rtconst and \rtfun trivially hold
+       as there is no $e'$ such that \eval{e}{e'}.
+
+\item Case \rtsub. Assume
+$$	\hastype{\emptyset}{e}{\tau}$$
+By inversion
+$$	\hastype{\emptyset}{e}{\tau'} \ (1) \qquad
+	\issubtype{\emptyset}{\tau'}{\tau}\ (2) \qquad
+	\iswellformed{\emptyset}{\tau}\ (3)
+$$
+
+By IH on $(1)$
+$$	\hastype{\emptyset}{e'}{\tau'} $$
+By which, $(2), (3)$ and \rtsub
+$$	\hastype{\emptyset}{e'}{\tau}$$
+
+
+\item Case \rtapp. Assume
+$$	\hastype{\emptyset}{e}{\tau}\ (1)$$
+where $e \equiv \eapp{e_1}{e_2}$, and
+	  $\tau\equiv\tau'\sub{x}{e_2}$
+
+By inversion
+$$	
+	\hastype{\emptyset}{e_1}{(\tfun{x}{\tau_{x}}{\tau'})}\ (2) \qquad
+	\hastype{\emptyset}{e_2}{\tau_{x}}\ (3)
+$$
+
+We split cases on the structure of $e$.
+\begin{itemize}
+\item $e\equiv \eapp{c}{v_2}$.
+Then, $e'\equiv\interp{c}(v_2)$.
+By Definition \ref{def:constants},
+$$\hastype{\emptyset}{e'}{\tau}$$
+
+\item $e\equiv \eapp{c}{e_2}$ where $e_2$ is not a value, 
+Then, by (3) and Lemma \ref{lemma:progress},
+\eval{e_2}{e_2'}, and $e' \equiv \eapp{e_1}{e_2'}$
+%
+By IH on $(2)$
+$$	\hastype{\emptyset}{e_2'}{\tau_{x}}$$
+By which, $(1)$ and rule \rtapp we get
+$$\hastype{\emptyset}{e'}{\tau'\sub{x}{e_2'}}\ (4)$$
+By Lemma \ref{lemma:eval}
+$$
+	\issubtype{\emptyset}{\tau'\sub{x}{e_2'}}{\tau'\sub{x}{e_2}}\ (5)
+$$
+By $(1)$ and Lemma \ref{lemma:wellformed}
+$$
+	\iswellformed{\emptyset}{\tau'\sub{x}{e_2}}\ (6)
+$$
+By $(4), (5), (6)$ and rule \rtsub
+$$	\hastype{\emptyset}{e'}{\tau}$$
+
+\item $e \equiv \eapp{\efun{x}{e_x}}{e_2}$.
+Then, $e' \equiv e_x\sub{x}{e_2}$.
+
+By inversion on $(2)$
+$$
+	\hastype{x\colon\tau_x}{e_x}{\tau'}
+$$
+By which, $(3)$ and Lemma \ref{lemma:substitution} (since \iswellformed{}{x\colon\tau_x})
+$$\hastype{\emptyset}{e'}{\tau'}$$
+
+\item $e \equiv \eapp{e_1}{e_2}$, where $e_1$ is not a value.
+Then, by $(2)$ and Lemma \ref{lemma:progress}, \eval{e_1}{e_1'} and 
+$e'\equiv\eapp{e_1'}{e_2}$
+By IH on $(2)$
+$$	\hastype{\emptyset}{e_1'}{(\tfun{x}{\tau_{x}}{\tau'})}
+$$
+By which, $(3)$ and rule \rtapp we get
+$$	\hastype{\emptyset}{e'}{\tau}$$
+\end{itemize}
+\end{itemize}

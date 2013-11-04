@@ -1,0 +1,46 @@
+Assume \hastype{\emptyset}{e}{\tau}.
+We will prove the Lemma by induction on the derivation tree.
+\begin{itemize}
+\item Case \rtexact. Assume
+$$	\hastype{\emptyset}{e}{\tref{v}{b}{v = e}}
+$$
+where $\tau\equiv\tref{v}{b}{v=e}$.
+By inversion
+$$	\hastype{\emptyset}{e}{\tref{v}{b}{e'}}$$
+By IH 
+either $e \equiv v$ or there exists an $e'$ such that \eval{e}{e'}.
+
+\item Cases \rtvarbase, \rtvar cannot occur, as $\Gamma = \emptyset$
+\item Cases \rtconst and \rtfun are trivial, 
+		as $e$ is a value
+\item Case \rtsub. Assume 
+$$\hastype{\emptyset}{e}{\tau}$$
+By inversion
+$$	\hastype{\emptyset}{e}{\tau'}$$
+By IH 
+either $e \equiv v$ or there exists an $e'$ such that \eval{e}{e'}.
+\item Case \rtapp. Assume 
+$$\hastype{\emptyset}{e}{\tau}\ (1)$$
+where $e\equiv\eapp{e_1}{e_2}$ and $\tau\equiv\tau'\sub{x}{e_2}$
+By inversion
+$$
+	\hastype{\emptyset}{e_1}{(\tfun{x}{\tau_{x}}{\tau})}\ (2)\qquad
+	\hastype{\emptyset}{e_2}{\tau_{x}}\ (3)
+$$
+
+We split cases on the structure of $e$.
+\begin{itemize}
+\item $e\equiv \eapp{c}{v_2}$.
+Then, $e'\equiv\interp{c}(v_2)$.
+
+\item $e\equiv \eapp{c}{e_2}$ where $e_2$ is not a value, 
+By IH on $(3)$ \eval{e_2}{e_2'} and  $e' \equiv \eapp{e_1}{e_2'}$
+
+\item $e \equiv \eapp{\efun{x}{e_x}}{e_2}$.
+Then, $e' \equiv e_x\sub{x}{e_2}$.
+
+\item $e \equiv \eapp{e_1}{e_2}$, where $e_1$ is not a value.
+Then, by IH on $(2)$ \eval{e_1}{e_1'} and 
+$e'\equiv\eapp{e_1'}{e_2}$.
+\end{itemize}
+\end{itemize}

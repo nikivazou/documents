@@ -9,10 +9,11 @@
 \include{haskellListings}
 \usepackage{amsthm}
 
+\newtheorem{definition}{Definition}
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
 
-\newcommand\showproof[1]{}
+\newcommand\showproof[1]{\texttt{proved}}
 
 %% RULE NAMES
 \newcommand\rulename[1]{\textsc{#1}\xspace}
@@ -297,6 +298,7 @@ $$
 
 
 \section*{Constants}
+\begin{definition}\label{def:constants}
 For each constant $c$, 
 \begin{enumerate}
 \item \hastype{\emptyset}{c}{\ty{c}}
@@ -309,6 +311,7 @@ $\forall c'\ c' \neq c. \lnot (\generalconditionInterp{c}{e\sub{v}{c'}})$
 \end{enumerate}
 Moreover, $=$ is a constant and for any expression $e$ we have 
 $$\generalconditionImplOne{e = e}$$
+\end{definition}
 
 \section*{Semantic Typing}
 \begin{align*}
@@ -332,8 +335,8 @@ $$\generalconditionImplOne{e = e}$$
 }
 
 
-\begin{lemma}[Substitution]
-If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{\Gamma, x\colon\tau_x ,\Gamma'}, then 
+\begin{lemma}[Substitution]\label{lemma:substitution}
+If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{}{\Gamma, x\colon\tau_x ,\Gamma'}, then 
 \begin{enumerate}
 \item If 
 	\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau_1}{\tau_2}
@@ -354,18 +357,31 @@ If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{\Gamma, x\colon\tau_x ,\Gamma
 	\input{proofs/substitution}
 	\end{proof}
 }
-\begin{lemma}
-If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}
+\begin{lemma}\label{lemma:eval}
+If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}.
+\end{lemma}
+
+\begin{lemma}\label{lemma:wellformed}
+If \iswellformed{}{\Gamma} and \hastype{\Gamma}{e}{\tau} then \iswellformed{\Gamma}{\tau}.
 \end{lemma}
 
 
-
-\begin{lemma}[Preservation]
-If \hastype{\Gamma}{e}{\tau} and \eval{e}{e'} then \hastype{\Gamma}{e'}{\tau}.
+\begin{lemma}[Preservation]\label{lemma:preservation}
+If \hastype{\emptyset}{e}{\tau} and \eval{e}{e'} then \hastype{\emptyset}{e'}{\tau}.
 \end{lemma}
-\begin{lemma}[Progress]
+\showproof{
+	\begin{proof}
+	\input{proofs/preservation}
+	\end{proof}
+}
+\begin{lemma}[Progress]\label{lemma:progress}
 If \hastype{\emptyset}{e}{\tau} and $e \neq v$ then there exists an $e'$ such that \eval{e}{e'}.
 \end{lemma}
+\showproof{
+	\begin{proof}
+	\input{proofs/progress}
+	\end{proof}
+}
 
 \section*{Interpretations}
 \begin{align*}
