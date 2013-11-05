@@ -1,0 +1,471 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{commands}
+\usepackage{xspace}
+\usepackage[inference]{semantic}
+\include{haskellListings}
+\usepackage{amsthm}
+
+\newtheorem{definition}{Definition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+
+%\newcommand\showproof[1]{#1}
+\newcommand\showproof[1]{\texttt{proved}}
+
+%% RULE NAMES
+\newcommand\rulename[1]{\textsc{#1}\xspace}
+
+
+\newcommand\rwbase{\rulename{WF-Base}}
+\newcommand\rwfun{\rulename{WF-Fun}}
+
+\newcommand\rsubbase{\ensuremath{\preceq}\rulename{-Base}}
+\newcommand\rsubfun{\ensuremath{\preceq}\rulename{-Fun}}
+
+\newcommand\rtvar{\rulename{T-Var}}
+\newcommand\rtvarbase{\rulename{T-Var-Base}}
+\newcommand\rtconst{\rulename{T-Const}}
+\newcommand\rtsub{\rulename{T-Sub}}
+\newcommand\rtexact{\rulename{T-Ex}}
+\newcommand\rtfun{\rulename{T-Fun}}
+\newcommand\rtapp{\rulename{T-App}}
+
+\newcommand\rimpl{\ensuremath{\Rightarrow}\rulename{-Base}}
+
+
+%% EXPRESSIONS
+\newcommand\efun[2]{\ensuremath{\lambda #1 . #2}}
+\newcommand\eapp[2]{\ensuremath{#1 \ #2}}
+\newcommand\elet[3]{\ensuremath{\text{let}\ #1 = #2\ \text{in}\ #3}}
+\newcommand\erec[3]{\ensuremath{\mu #1 \lambda #2 . #3}}
+
+\newcommand\etrue{\ensuremath{\text{true}}}
+\newcommand\efalse{\ensuremath{\text{false}}}
+
+
+%% TYPES
+\newcommand\tint{\ensuremath{\text{int}}}
+\newcommand\tbool{\ensuremath{\text{bool}}}
+\newcommand\tref[3]{\ensuremath{\left\lbrace #1 \colon #2 \mid #3 \right\rbrace}}
+\newcommand\tfun[3]{\ensuremath{#1\colon #2 \rightarrow #3}}
+
+%% OTHER
+\newcommand\eqb[1]{\ensuremath{=_{#1}}}
+\newcommand\eq{\eqb{}}
+
+\newcommand\validn[2]{\ensuremath{\text{Valid}_{#2}\ (#1)}}
+\newcommand\finn[2]{\ensuremath{\text{Fin}_{#2}\ (#1)}}
+\newcommand\validi[1]{\ensuremath{\text{Valid}_{i}\ (#1)}}
+\newcommand\fini[1]{\ensuremath{\text{Fin}_{i}\ (#1)}}
+\newcommand\fin[1]{\ensuremath{\text{Fin}\ (#1)}}
+
+\newcommand\valid[1]{\ensuremath{\text{Valid}(#1)}}
+
+% \newcommand\generalconditionInterp[2]{\ensuremath{\fin{#1} \Rightarrow \valid{#2}}}
+% \newcommand\generalconditionImpl[2]{\ensuremath{\valid{#1} \Rightarrow \valid{#2}}}
+% \newcommand\generalconditionImplOne[2]{\ensuremath{\valid{#1}}}
+
+\newcommand\generalconditionInterp[2]
+	{\ensuremath{(\forall i. \fini{#1} \Rightarrow \validi{#2})}}
+\newcommand\generalconditionImpl[2]
+	{\ensuremath{\forall i . \validi{#1} \Rightarrow \validi{#2}}}
+\newcommand\generalconditionImplOne[1]
+	{\ensuremath{\forall i . \validi{#1}}}
+
+%% general condition interp can be any condition in which 
+%% the second argument appears in positive places
+
+
+
+%OTHER
+\newcommand\ty[1]{\ensuremath{\text{ty}({#1})}}
+\newcommand\sub[2]{\ensuremath{\left[ #2 / #1 \right]}}
+\newcommand\erase[1]{\ensuremath{\lfloor #1 \rfloor}}
+
+\newcommand\interp[1]{\ensuremath{[|#1|]}}
+\newcommand\eval[2]{\ensuremath{#1 \hookrightarrow #2}}
+\newcommand\evals[2]{\ensuremath{#1 \hookrightarrow^\star #2}}
+\newcommand\hastype[3]{\ensuremath{#1 \vdash #2 \colon #3}}
+\newcommand\hastypebase[3]{\ensuremath{#1 \vdash_B #2 \colon #3}}
+\newcommand\shastype[3]{\ensuremath{#1 \vdash #2 \in #3}}
+\newcommand\iswellformed[2]{\ensuremath{#1 \vdash #2}}
+\newcommand\biswellformed[2]{\ensuremath{#1 \vdash_B #2}}
+\newcommand\issubtype[3]{\ensuremath{#1 \vdash #2 \preceq #3}}
+\newcommand\sissubtype[3]{\ensuremath{#1 \vdash #2 \subseteq #3}}
+\newcommand\issubref[3]{\ensuremath{#1 \vdash #2 \Rightarrow #3}}
+\title{Refinements for Lazy Evaluation}
+\begin{document}
+\section*{Syntax}
+$$
+\begin{array}{rrcl}
+\emphbf{Value} \quad 
+  & v
+  & ::= 
+  &   	 c 
+  \spmid \efun{x}{e} 
+  \\[0.05in] 
+
+
+\emphbf{Expressions} \quad 
+  & e
+  & ::= 
+  &   	 v 
+  \spmid x 
+  \spmid \eapp{e}{e}    
+  \\[0.05in] 
+
+\emphbf{Basic Types} \quad 
+  & b
+  & ::=  
+  & 	\tint \spmid \tbool
+  \\[0.05in] 
+
+\emphbf{Types} \quad 
+  & \tau
+  & ::=  
+  & 	\tref{v}{b}{e}
+  \spmid \tfun{x}{\tau}{\tau}    
+  \\[0.05in] 
+
+\emphbf{Environment} \quad 
+  & \Gamma
+  & ::= 
+  &     \emptyset \spmid x\colon \tau, \Gamma
+
+\end{array}
+$$
+
+
+
+\section*{Erasing}
+\begin{align*}
+\erase{\tref{v}{b}{e}}&=b\\
+\erase{\tfun{x}{\tau_x}{\tau}}&= \erase{\tau_x} \rightarrow \erase{\tau}
+\end{align*}
+
+\begin{align*}
+\erase{\emptyset}&=\emptyset\\
+\erase{x\colon\tau, \Gamma}&= x\colon\erase{\tau},\erase{\Gamma}
+\end{align*}
+
+\section*{Substitutions}
+\begin{align*}
+(\tref{v}{b}{e})\sub{y}{e_y} &=\tref{v}{b}{e\sub{y}{e_y}}\\
+(\tfun{x}{\tau_x}{\tau})\sub{y}{e_y} &=\tfun{x}{(\tau_x\sub{y}{e_y})}{(\tau\sub{y}{e_y})}
+\end{align*}
+
+\section*{Interpretations}
+\begin{definition} \label{def:valid}
+Let \fini{\star} and \validi{\star} be predicates on expressions such that
+\begin{enumerate}
+\item 
+	For \hastype{\emptyset}{e}{\tref{v}{b}{e_r}}
+	\generalconditionInterp{e}{e_r} is a ``meaningful''
+	soundness predicate.
+
+\item For any $x, e, e_r, \theta$, if \eval{e}{e'} then 
+	\generalconditionImpl{\theta\ e_r\sub{x}{e'}}{\theta\ e_r\sub{x}{e}} and
+	\generalconditionImpl{\theta\ e_r\sub{x}{e}}{\theta\ e_r\sub{x}{e'}}.
+\end{enumerate} 
+\end{definition}
+
+\begin{align*}
+\interp{\tref{v}{b}{e_v}} &= 
+	\{e \mid \hastype{}{e}{b} 
+	\land 
+	\generalconditionInterp{e}{e_v\sub{v}{e}} 
+	\}\\
+\interp{\tfun{x}{\tau_x}{\tau}} &= 
+	\{e \mid \hastype{}{e}{\erase{\tau_x} \rightarrow \erase{\tau}} 
+	\land 
+	\forall e_x \in \interp{\tau_x}. \
+	 \eapp{e}{e_x} \in \interp{\tau\sub{x}{e_x}} 
+	 \}
+\end{align*}
+
+\section*{Typing}
+
+\hfill\mbox{\hastype{\Gamma}{e}{\tau}}
+
+%% unifying these rules for simplicity, 
+%% You can fake it: every time you add a
+%% binding to env it should have 	v = x
+%% then I get this by implication
+%\rtvar
+%\rtvarbase
+%\rtconst
+%\rtsub
+%\rtexact
+%\rtfun
+%\rtapp
+$$
+\inference{
+	\hastype{\Gamma}{e}{\tref{v}{b}{e'}}
+}{
+	\hastype{\Gamma}{e}{\tref{v}{b}{v \eqb{b} e}}
+}[\rtexact]
+$$
+$$
+\inference{
+	(x,\tref{v}{b}{e}) \in \Gamma
+}{
+	\hastype{\Gamma}{x}{\tref{v}{b}{v \eqb{b} x}}
+}[\rtvarbase]
+\qquad
+\inference{
+	(x,\tau) \in \Gamma &&
+	\tau \equiv \tfun{x'}{\tau_x'}{\tau'}
+}{
+	\hastype{\Gamma}{x}{\tau}
+}[\rtvar]
+$$
+$$
+\inference{
+}{
+	\hastype{\Gamma}{c}{\ty{c}}
+}[\rtconst]
+\qquad
+\inference{
+	\hastype{\Gamma}{e}{\tau'} &&
+	\issubtype{\Gamma}{\tau'}{\tau} &&
+	\iswellformed{\Gamma}{\tau} &&
+}{
+	\hastype{\Gamma}{e}{\tau}
+}[\rtsub]
+$$
+$$
+\inference{
+	\hastype{\Gamma, x\colon\tau_x}{e}{\tau} &&
+	\iswellformed{\Gamma}{\tau_x}
+}{
+	\hastype{\Gamma}{\efun{x}{e}}{(\tfun{x}{\tau_x}{\tau})}
+}[\rtfun]
+\qquad
+\inference{
+	\hastype{\Gamma}{e_1}{(\tfun{x}{\tau_{x}}{\tau})} &&
+	\hastype{\Gamma}{e_2}{\tau_{x}}
+}{
+	\hastype{\Gamma}{\eapp{e_1}{e_2}}{\tau\sub{x}{e_2}}
+}[\rtapp]
+$$
+
+
+\hfill\mbox{\iswellformed{\Gamma}{\tau}}
+$$
+\inference{
+	\hastypebase{\erase{\Gamma}, v\colon b}{e}{\tbool}
+}{
+	\iswellformed{\Gamma}{\tref{v}{b}{e}}
+}[\rwbase]
+\qquad
+\inference{
+	\iswellformed{\Gamma}{\tau_x} &&
+	\iswellformed{\Gamma, x \colon \tau_x}{\tau}
+}{
+	\iswellformed{\Gamma}{\tfun{x}{\tau_x}{\tau}}
+}[\rwfun]
+$$
+
+\hfill\mbox{\issubtype{\Gamma}{\tau}{\tau}}
+$$
+\inference{
+	\issubref{\Gamma, v:b}{e_1}{e_2}
+}{
+	\issubtype{\Gamma}{\tref{v}{b}{e_1}}{\tref{v}{b}{e_2}}
+}[\rsubbase]
+\qquad
+\inference{
+	\issubtype{\Gamma}{\tau'_x}{\tau_x} &&
+	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'}
+}{
+	\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}
+}[\rsubfun]
+$$
+
+\hfill\mbox{\issubref{\Gamma}{e}{e}}
+$$
+\inference{
+	\forall \theta. \iswellformed{\Gamma}{\theta} \land
+	\generalconditionImpl{\theta\ e_1}{\theta\ e_2}
+}{
+	\issubref{\Gamma}{e_1}{e_2}
+}[\rimpl]
+$$
+
+\hfill\mbox{\iswellformed{}{\Gamma}}
+$$
+\inference{
+	\iswellformed{}{\Gamma} &&
+	\iswellformed{\Gamma}{\tau}
+}{
+	\iswellformed{}{x\colon\tau,\Gamma}
+}
+\qquad
+\inference{}{\iswellformed{}{\emptyset}}
+$$
+
+
+\hfill\mbox{\iswellformed{\Gamma}{\theta}}
+$$
+\inference{
+	\forall x \in \text{Dom}(\Gamma). 
+	\theta(x) \in \interp{\theta \ \Gamma(x)}
+}{
+	\iswellformed{\Gamma}{\theta}
+}
+$$
+
+
+\section*{Constants}
+\begin{definition}\label{def:constants}
+For each constant $c$, 
+\begin{enumerate}
+\item \hastype{\emptyset}{c}{\ty{c}} and \iswellformed{}{\ty{c}}
+\item If $\ty{c} = \tfun{x}{\tau_x}{\tau}$, then for each $v$ such that
+\hastype{\emptyset}{v}{\tau_x} $\interp{c}(v)$ is defined and
+\hastype{}{\interp{c}(v)}{\tau\sub{x}{v}}
+\item If $\ty{c} = \tref{v}{b}{e}$, 
+then \generalconditionInterp{c}{e\sub{v}{c}} and 
+$\forall c'\ c' \neq c. \lnot (\generalconditionInterp{c}{e\sub{v}{c'}})$ 
+\end{enumerate}
+Moreover, for any base type $b$ \eq{b} is a constant and 
+\begin{itemize}
+\item For any expression $e$ we have 
+$$\generalconditionImplOne{e \eqb{b} e}$$
+\item For any base type $b$ 
+$$\ty{=_b} \equiv \tfun{x}{b}{\tfun{y}{b}{\tbool}}$$
+\end{itemize}
+\end{definition}
+
+\section*{Semantic Typing}
+\begin{align*}
+\shastype{\Gamma}{e}{\tau} & \doteq
+	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ e \in \interp{\theta \ \tau}\\
+\sissubtype{\Gamma}{\tau_1}{\tau_2} & \doteq 
+	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \interp{\theta\ \tau_1} \subseteq \interp{\theta\ \tau_2}
+\end{align*}
+
+
+\begin{lemma}.
+\begin{enumerate}
+\item If \issubtype{\Gamma}{\tau_1}{\tau_2} then \sissubtype{\Gamma}{\tau_1}{\tau_2} 
+\item If \hastype{\Gamma}{e}{\tau} then \shastype{\Gamma}{e}{\tau} 
+\end{enumerate}
+\end{lemma}
+\showproof{
+	\begin{proof}
+	\input{proofs/interp}
+	\end{proof}
+}
+
+
+\begin{lemma}[Substitution]\label{lemma:substitution}
+If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{}{\Gamma, x\colon\tau_x ,\Gamma'}, then 
+\begin{enumerate}
+\item If 
+	\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau_1}{\tau_2}
+	then
+	\issubtype{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau_1}{\sub{x}{e_x}\tau_2}
+\item If 
+	\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}
+	then
+	\hastype{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}e}{\sub{x}{e_x}\tau}
+\item If 
+	\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau}
+	then
+	\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\sub{x}{e_x}\tau}
+\end{enumerate}
+\end{lemma}
+\showproof{
+	\begin{proof}
+	\input{proofs/substitution}
+	\end{proof}
+}
+
+\begin{lemma}\label{lemma:erase} % for \ref{lemma:wellformed}
+If \hastype{\Gamma}{e}{\tau} 
+then \hastypebase{\erase{\Gamma}}{e}{\erase{\tau}}.
+\end{lemma}
+
+
+\begin{lemma}\label{lemma:wellformed}
+If \iswellformed{}{\Gamma} and \hastype{\Gamma}{e}{\tau} then \iswellformed{\Gamma}{\tau}.
+\end{lemma}
+\showproof{
+	\begin{proof}
+	\input{proofs/wellformed}
+	\end{proof}
+}
+
+\section*{Operational Semantic}
+
+$$
+\begin{array}{lllll}
+\eval{\eapp{e_1}{e_2}}{\eapp{e_1'}{e_2}} & \text{if } \eval{e_1}{e_1'}&\qquad\qquad&
+\eval{\eapp{\efun{x}{e}}{e_x}}{e\sub{x}{e_x}} &\\
+\eval{\eapp{c}{e}}{\eapp{c}{e'}} & \text{if } \eval{e}{e'} &\qquad\qquad&
+\eval{\eapp{c}{v}}{[|c|](v)} &
+\end{array}
+$$
+
+\section*{Soundness}
+\begin{lemma}\label{lemma:eval}
+If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}.
+\end{lemma}
+\showproof{
+	\begin{proof}
+	\input{proofs/eval}
+	\end{proof}
+}
+
+\begin{lemma}[Preservation]\label{lemma:preservation}
+If \hastype{\emptyset}{e}{\tau} and \eval{e}{e'} then \hastype{\emptyset}{e'}{\tau}.
+\end{lemma}
+\showproof{
+	\begin{proof}
+	\input{proofs/preservation}
+	\end{proof}
+}
+\begin{lemma}[Progress]\label{lemma:progress}
+If \hastype{\emptyset}{e}{\tau} and $e \neq v$ then there exists an $e'$ such that \eval{e}{e'}.
+\end{lemma}
+\showproof{
+	\begin{proof}
+	\input{proofs/progress}
+	\end{proof}
+}
+
+\section*{Interpretations}
+\begin{align*}
+\fin{e} \doteq \exists v. \evals{e}{v}\\
+\valid{e} \Leftrightarrow \evals{e}{v}\Rightarrow\evals{e}{\etrue}
+\end{align*}
+
+\begin{align*}
+\interp{x}&=x &&&
+\interp{\efun{x}{e}}&=f\\
+\interp{c}&=c &&&
+\interp{\eapp{e_1}{e_2}}&=\interp{e_1}(\interp{e_2})\\
+\end{align*}
+
+
+
+\begin{claim}
+$$
+\left\lbrace	
+	\bigwedge_{(x,\tref{b}{v}{e})\in\Gamma}(\fin{x}\Rightarrow \interp{e\sub{v}{x}})
+	\Rightarrow \interp{e_1}
+	\Rightarrow \interp{e_2}
+\right\rbrace
+\Rightarrow
+\left\lbrace	
+\issubref{\Gamma}{e_1}{e_2}
+\right\rbrace
+$$
+\end{claim}
+
+\end{document}
