@@ -1,0 +1,42 @@
+Assume \eval{e}{e'}.
+We will prove that 
+\issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}
+and
+\issubtype{\Gamma}{\tau\sub{x}{e}}{\tau\sub{x}{e'}}
+by structural induction on $\tau$.
+
+\begin{itemize}
+\item $\tau\equiv \tref{v}{b}{e_r}$
+By Definition \ref{def:valid}, 
+$$\forall \theta. \iswellformed{\Gamma}{\theta} \land 
+	\generalconditionImpl{\theta\ e_r\sub{x}{e'}}{\theta\ e_r\sub{x}{e}}
+$$
+$$
+\forall \theta. \iswellformed{\Gamma}{\theta} \land 
+	\generalconditionImpl{\theta\ e_r\sub{x}{e}}{\theta\ e_r\sub{x}{e'}}$$
+
+So, 
+$$\issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}
+\qquad
+\issubtype{\Gamma}{\tau\sub{x}{e}}{\tau\sub{x}{e'}}
+$$	
+\item $\tau\equiv \tfun{y}{\tau'_y}{\tau'}$
+By IH we have
+$$
+\issubtype{\Gamma}{\tau'_y\sub{x}{e'}}{\tau'_y\sub{x}{e}}\ (1)
+\qquad
+\issubtype{\Gamma}{\tau'_y\sub{x}{e}}{\tau'_y\sub{x}{e'}}\ (2)
+$$
+
+$$
+\issubtype{\Gamma, y\colon\tau'_y\sub{x}{e}}{\tau'\sub{x}{e'}}{\tau'\sub{x}{e}}\ (3)
+\qquad
+\issubtype{\Gamma, y\colon\tau'_y\sub{x}{e'}}{\tau'\sub{x}{e}}{\tau'\sub{x}{e'}}\ (4)
+$$
+
+By $(1), (4)$ and rule \rtsub we have
+$$\issubtype{\Gamma}{\tau\sub{x}{e}}{\tau\sub{x}{e'}}$$
+
+By $(2), (3)$ and rule \rtsub we have
+$$\issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}$$
+\end{itemize}

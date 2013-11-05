@@ -159,16 +159,17 @@ $$
 \end{align*}
 
 \section*{Interpretations}
-\begin{definition}
+\begin{definition} \label{def:valid}
 Let \fini{\star} and \validi{\star} be predicates on expressions such that
 \begin{enumerate}
 \item 
 	For \hastype{\emptyset}{e}{\tref{v}{b}{e_r}}
 	\generalconditionInterp{e}{e_r} is a ``meaningful''
-	soundness predicate
+	soundness predicate.
 
-\item For any $x, e, e_r$, if \eval{e}{e'} then 
-	\generalconditionImpl{e_r\sub{x}{e'}}{e_r\sub{x}{e}}
+\item For any $x, e, e_r, \theta$, if \eval{e}{e'} then 
+	\generalconditionImpl{\theta\ e_r\sub{x}{e'}}{\theta\ e_r\sub{x}{e}} and
+	\generalconditionImpl{\theta\ e_r\sub{x}{e}}{\theta\ e_r\sub{x}{e'}}.
 \end{enumerate} 
 \end{definition}
 
@@ -415,6 +416,11 @@ $$
 \begin{lemma}\label{lemma:eval}
 If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}.
 \end{lemma}
+\showproof{
+	\begin{proof}
+	\input{proofs/eval}
+	\end{proof}
+}
 
 \begin{lemma}[Preservation]\label{lemma:preservation}
 If \hastype{\emptyset}{e}{\tau} and \eval{e}{e'} then \hastype{\emptyset}{e'}{\tau}.
