@@ -22,15 +22,19 @@
 
 \newcommand\rwbase{\rulename{WF-Base}}
 \newcommand\rwfun{\rulename{WF-Fun}}
+\newcommand\rwcon{\rulename{WF-Con}}
 
 \newcommand\rsubbase{\ensuremath{\preceq}\rulename{-Base}}
 \newcommand\rsubfun{\ensuremath{\preceq}\rulename{-Fun}}
+\newcommand\rsubcon{\ensuremath{\preceq}\rulename{-Con}}
 
 \newcommand\rtvar{\rulename{T-Var}}
 \newcommand\rtvarbase{\rulename{T-Var-Base}}
 \newcommand\rtconst{\rulename{T-Const}}
 \newcommand\rtsub{\rulename{T-Sub}}
 \newcommand\rtexact{\rulename{T-Ex}}
+\newcommand\rtcase{\rulename{T-Case}}
+\newcommand\rtdata{\rulename{T-Data}}
 \newcommand\rtfun{\rulename{T-Fun}}
 \newcommand\rtapp{\rulename{T-App}}
 
@@ -40,6 +44,8 @@
 %% EXPRESSIONS
 \newcommand\efun[2]{\ensuremath{\lambda #1 . #2}}
 \newcommand\eapp[2]{\ensuremath{#1 \ #2}}
+\newcommand\edata[2]{\ensuremath{#1 \ #2}}
+\newcommand\ecase[5]{\ensuremath{\text{case}\ #1\ #2\ \text{of}\ \overline{\edata{#3}{#4} \rightarrow #5}}}
 \newcommand\elet[3]{\ensuremath{\text{let}\ #1 = #2\ \text{in}\ #3}}
 \newcommand\erec[3]{\ensuremath{\mu #1 \lambda #2 . #3}}
 
@@ -50,7 +56,9 @@
 %% TYPES
 \newcommand\tint{\ensuremath{\text{int}}}
 \newcommand\tbool{\ensuremath{\text{bool}}}
-\newcommand\tref[3]{\ensuremath{\left\lbrace #1 \colon #2 \mid #3 \right\rbrace}}
+\newcommand\tref[3]{\ensuremath{\left\lbrace {#1} \colon {#2} \mid {#3} \right\rbrace}}
+\newcommand\tconref[4]{\tref{#3}{\tcon{#1}{#2}}{#4}}
+\newcommand\tcon[2]{\ensuremath{#1\ #2}}
 \newcommand\tfun[3]{\ensuremath{#1\colon #2 \rightarrow #3}}
 
 %% OTHER
@@ -107,15 +115,19 @@ $$
   & ::= 
   &   	 c 
   \spmid \efun{x}{e} 
+  \spmid \edata{D}{\overline{e}}
   \\[0.05in] 
 
 
 \emphbf{Expressions} \quad 
   & e
   & ::= 
-  &   	 v 
+  &   	 c 
+  \spmid \efun{x}{e} 
   \spmid x 
-  \spmid \eapp{e}{e}    
+  \spmid D 
+  \spmid \eapp{e}{e}  
+  \\ &&& \ecase{e}{x}{D}{\overline{x}}{e}
   \\[0.05in] 
 
 \emphbf{Basic Types} \quad 
@@ -129,6 +141,7 @@ $$
   & ::=  
   & 	\tref{v}{b}{e}
   \spmid \tfun{x}{\tau}{\tau}    
+  \spmid \tconref{T}{\overline{\tau}}{v}{e}    
   \\[0.05in] 
 
 \emphbf{Environment} \quad 
@@ -144,7 +157,8 @@ $$
 \section*{Erasing}
 \begin{align*}
 \erase{\tref{v}{b}{e}}&=b\\
-\erase{\tfun{x}{\tau_x}{\tau}}&= \erase{\tau_x} \rightarrow \erase{\tau}
+\erase{\tfun{x}{\tau_x}{\tau}}&= \erase{\tau_x} \rightarrow \erase{\tau}\\
+\erase{\tconref{T}{\overline{\tau}}{v}{e}}&= \tcon{T}\overline{\erase{\tau}}
 \end{align*}
 
 \begin{align*}
@@ -155,7 +169,9 @@ $$
 \section*{Substitutions}
 \begin{align*}
 (\tref{v}{b}{e})\sub{y}{e_y} &=\tref{v}{b}{e\sub{y}{e_y}}\\
-(\tfun{x}{\tau_x}{\tau})\sub{y}{e_y} &=\tfun{x}{(\tau_x\sub{y}{e_y})}{(\tau\sub{y}{e_y})}
+(\tfun{x}{\tau_x}{\tau})\sub{y}{e_y} &=\tfun{x}{(\tau_x\sub{y}{e_y})}{(\tau\sub{y}{e_y})}\\
+(\tconref{T}{\overline{\tau}}{v}{e})\sub{y}{e_y} 
+	&=\tconref{T}{\overline{\tau\sub{y}{e_y}}}{v}{e\sub{y}{e_y}}
 \end{align*}
 
 \section*{Interpretations}
@@ -173,20 +189,32 @@ Let \fini{\star} and \validi{\star} be predicates on expressions such that
 \end{enumerate} 
 \end{definition}
 
-\begin{align*}
-\interp{\tref{v}{b}{e_v}} &= 
-	\{e \mid \hastype{}{e}{b} 
+$$
+\begin{array}{lll}
+\interp{\tref{v}{b}{e_v}} &=
+	\{e \mid & \hastype{}{e}{b} 
 	\land 
 	\generalconditionInterp{e}{e_v\sub{v}{e}} 
 	\}\\
-\interp{\tfun{x}{\tau_x}{\tau}} &= 
-	\{e \mid \hastype{}{e}{\erase{\tau_x} \rightarrow \erase{\tau}} 
+\interp{\tfun{x}{\tau_x}{\tau}} &=
+	\{e \mid & \hastype{}{e}{\erase{\tau_x} \rightarrow \erase{\tau}} 
 	\land 
 	\forall e_x \in \interp{\tau_x}. \
 	 \eapp{e}{e_x} \in \interp{\tau\sub{x}{e_x}} 
+	 \}\\
+\interp{\tconref{T}{\overline{\tau}}{v}{e_v}} &= 
+	\{e \mid & \hastype{}{e}{\erase{\tconref{T}{\overline{\tau}}{v}{e_v}}} 
+	\land 
+	\generalconditionInterp{e}{e_v\sub{v}{e}}
+	\land \\&& 
+	\evals{e}{\edata{D}{\overline{e}}} \Rightarrow 
+	\ty{D} = \overline{x\colon\tau'}\rightarrow\tconref{T}{\overline{\tau}}{v}{e_T} \land 	
+	\overline{e_i \in \interp{\overline{\sub{x_i}{e_i}} \tau'_i}}
 	 \}
-\end{align*}
+\end{array}
+$$
 
+ASSUMING ALL ARGUMENTS ARE COVARIANT!
 \section*{Typing}
 
 \hfill\mbox{\hastype{\Gamma}{e}{\tau}}
@@ -202,6 +230,7 @@ Let \fini{\star} and \validi{\star} be predicates on expressions such that
 %\rtexact
 %\rtfun
 %\rtapp
+%\rtcase
 $$
 \inference{
 	\hastype{\Gamma}{e}{\tref{v}{b}{e'}}
@@ -252,6 +281,26 @@ $$
 	\hastype{\Gamma}{\eapp{e_1}{e_2}}{\tau\sub{x}{e_2}}
 }[\rtapp]
 $$
+$$
+\inference{
+	\hastype{\Gamma}{e}{\tconref{T}{\overline{\tau}}{v}{e_T}} \\
+	\forall i. \{ 
+		\ty{D_i} = \overline{x\colon\tau_D}\rightarrow \tconref{T}{\overline{\alpha}}{v}{e'_T} \\
+		\theta_x = \sub{x}{y} && \theta_\alpha = \sub{\alpha}{\tau} && \theta = \theta_x\ \theta_\alpha\\
+		\qquad \hastype{\Gamma, \overline{y\colon\theta\ \tau_D}, 
+						x\colon \tconref{T}{\overline{\tau}}{v}{e_T \land \theta e'_T}
+						}{e_i}{\tau}
+				\}
+}{
+	\hastype{\Gamma}{\ecase{e}{x}{D_i}{\overline{y}_i}{e_i}}{\tau}
+}[\rtcase]
+$$
+$$
+\inference{
+}{
+	\hastype{\Gamma}{D}{\ty{D}}
+}[\rtdata]
+$$
 
 
 \hfill\mbox{\iswellformed{\Gamma}{\tau}}
@@ -269,6 +318,14 @@ $$
 	\iswellformed{\Gamma}{\tfun{x}{\tau_x}{\tau}}
 }[\rwfun]
 $$
+$$
+\inference{
+	\forall i . \iswellformed{\Gamma}{\tau_i} &&
+	\hastypebase{\erase{\Gamma}, v \colon \erase{\tconref{T}{\tau}{v}{e}}}{e}{\tbool}
+}{
+	\iswellformed{\Gamma}{\tconref{T}{\tau}{v}{e}}
+}[\rwcon]
+$$
 
 \hfill\mbox{\issubtype{\Gamma}{\tau}{\tau}}
 $$
@@ -284,6 +341,16 @@ $$
 }{
 	\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}
 }[\rsubfun]
+$$
+$$
+\inference{
+	\forall i. \issubtype{\Gamma}{\tau}{\tau'} &&
+	\issubref{\Gamma, v:\tcon{T}{\overline{\tau}}}{e}{e'}
+}{
+	\issubtype{\Gamma}
+		{\tconref{T}{\overline{\tau}}{v}{e}}
+		{\tconref{T}{\overline{\tau'}}{v}{e'}}
+}[\rsubcon]
 $$
 
 \hfill\mbox{\issubref{\Gamma}{e}{e}}
@@ -409,6 +476,14 @@ $$
 \eval{\eapp{\efun{x}{e}}{e_x}}{e\sub{x}{e_x}} &\\
 \eval{\eapp{c}{e}}{\eapp{c}{e'}} & \text{if } \eval{e}{e'} &\qquad\qquad&
 \eval{\eapp{c}{v}}{[|c|](v)} &
+\end{array}
+$$
+$$
+\begin{array}{rllll}
+\eval{\ecase{e}{x}{D_i}{\overline{y}}{e_i}&}
+	 {&\ecase{e'}{x}{D_i}{line{y}}{e_i}} & \text{if } \eval{e}{e'} &\\
+\eval	{\ecase{\eapp{D_j}{\overline{e'}}}{x}{D_i}{\overline{y}}{e_i}&}
+		{&e_j\sub{y_l}{e'_l}} &
 \end{array}
 $$
 
