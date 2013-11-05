@@ -151,13 +151,21 @@ $$
 \end{array}
 $$
 
-
-
+\begin{itemize}
+\item $\texttt{Bool}\in T$
+\item $\texttt{True}, \texttt{False} \in D$
+\item $\ty{\texttt{True}} = \tref{v}{\texttt{Bool}}{v \Leftrightarrow \etrue}$, and
+$\ty{\texttt{False}} = \tref{v}{\texttt{Bool}}{v \Leftrightarrow \efalse}$
+\item
+$$\text{if}\ e\ \text{then}\ e_1\ \text{else}\ e_2 \doteq 
+\text{case}\ e\ x\ \text{of}\ \{\texttt{True}\Rightarrow e_1;\texttt{False}\Rightarrow e_2 \}
+$$
+\end{itemize}
 \section*{Erasing}
 \begin{align*}
 \erase{\tref{v}{b}{e}}&=b\\
 \erase{\tfun{x}{\tau_x}{\tau}}&= \erase{\tau_x} \rightarrow \erase{\tau}\\
-\erase{\tconref{T}{\overline{\tau}}{v}{e}}&= \tcon{T}\overline{\erase{\tau}}
+% \erase{\tconref{T}{\overline{\tau}}{v}{e}}&= \tcon{T}\overline{\erase{\tau}}
 \end{align*}
 
 \begin{align*}
@@ -169,8 +177,8 @@ $$
 \begin{align*}
 (\tref{v}{b}{e})\sub{y}{e_y} &=\tref{v}{b}{e\sub{y}{e_y}}\\
 (\tfun{x}{\tau_x}{\tau})\sub{y}{e_y} &=\tfun{x}{(\tau_x\sub{y}{e_y})}{(\tau\sub{y}{e_y})}\\
-(\tconref{T}{\overline{\tau}}{v}{e})\sub{y}{e_y} 
-	&=\tconref{T}{\overline{\tau\sub{y}{e_y}}}{v}{e\sub{y}{e_y}}
+% (\tconref{T}{\overline{\tau}}{v}{e})\sub{y}{e_y} 
+% 	&=\tconref{T}{\overline{\tau\sub{y}{e_y}}}{v}{e\sub{y}{e_y}}
 \end{align*}
 
 \section*{Interpretations}
@@ -201,19 +209,19 @@ $$
 	\forall e_x \in \interp{\tau_x}. \
 	 \eapp{e}{e_x} \in \interp{\tau\sub{x}{e_x}} 
 	 \}\\
-\interp{\tconref{T}{\overline{\tau}}{v}{e_v}} &= 
-	\{e \mid & \hastype{}{e}{\erase{\tconref{T}{\overline{\tau}}{v}{e_v}}} 
-	\land 
-	\generalconditionInterp{e}{e_v\sub{v}{e}}
-	\land \\&& 
-	\evals{e}{\edata{D}{\overline{e}}} \Rightarrow 
-	\ty{D} = \overline{x\colon\tau'}\rightarrow\tconref{T}{\overline{\tau}}{v}{e_T} \land 	
-	\overline{e_i \in \interp{\overline{\sub{x_i}{e_i}} \tau'_i}}
-	 \}
+%%\interp{\tconref{T}{\overline{\tau}}{v}{e_v}} &= 
+%%	\{e \mid & \hastype{}{e}{\erase{\tconref{T}{\overline{\tau}}{v}{e_v}}} 
+%%	\land 
+%%	\generalconditionInterp{e}{e_v\sub{v}{e}}
+%%	\land \\&& 
+%%	\evals{e}{\edata{D}{\overline{e}}} \Rightarrow 
+%%	\ty{D} = \overline{x\colon\tau'}\rightarrow\tconref{T}{\overline{\tau}}{v}{e_T} \land 	
+%%	\overline{e_i \in \interp{\overline{\sub{x_i}{e_i}} \tau'_i}}
+%%	 \}
 \end{array}
 $$
 
-ASSUMING ALL ARGUMENTS ARE COVARIANT!
+%% ASSUMING ALL ARGUMENTS ARE COVARIANT!
 \section*{Typing}
 
 \hfill\mbox{\hastype{\Gamma}{e}{\tau}}
@@ -282,18 +290,35 @@ $$
 $$
 $$
 \inference{
-	\hastype{\Gamma}{e}{\tconref{T}{\overline{\tau}}{v}{e_T}} \\
-	\forall i. \{ 
-		\ty{D_i} = \overline{x\colon\tau_D}\rightarrow \tconref{T}{\overline{\alpha}}{v}{e'_T} \\
-		\theta_x = \sub{x}{y} && \theta_\alpha = \sub{\alpha}{\tau} && \theta = \theta_x\ \theta_\alpha\\
-		\qquad \hastype{\Gamma, \overline{y\colon\theta\ \tau_D}, 
-						x\colon \tconref{T}{\overline{\tau}}{v}{e_T \land \theta e'_T}
-						}{e_i}{\tau}
-				\}
+	\hastype{\Gamma}{e}{\tref{v}{T}{e_T}} \\
+	\forall i. \left\lbrace
+	\begin{array}{ll}
+ 	\ty{D_i} = \overline{x\colon\tau_D}\rightarrow \tref{v}{T}{e'_T} \qquad
+ 	\theta = \sub{x}{y_i} \cr
+	\hastype{\Gamma, \overline{y_i\colon\theta\ \tau_D}, 
+				x\colon \tref{v}{T}{e_T \land \theta e'_T}
+				}{e_i}{\tau}
+	\end{array} \right.
 }{
 	\hastype{\Gamma}{\ecase{e}{x}{D_i}{\overline{y}_i}{e_i}}{\tau}
 }[\rtcase]
 $$
+
+%%Polymorphic data constructors
+%%$$
+%%\inference{
+%%	\hastype{\Gamma}{e}{\tconref{T}{\overline{\tau}}{v}{e_T}} \\
+%%	\forall i. \{ 
+%%		\ty{D_i} = \overline{x\colon\tau_D}\rightarrow \tconref{T}{\overline{\alpha}}{v}{e'_T} \\
+%%		\theta_x = \sub{x}{y} && \theta_\alpha = \sub{\alpha}{\tau} && \theta = \theta_x\ \theta_\alpha\\
+%%		\qquad \hastype{\Gamma, \overline{y\colon\theta\ \tau_D}, 
+%%						x\colon \tconref{T}{\overline{\tau}}{v}{e_T \land \theta e'_T}
+%%						}{e_i}{\tau}
+%%				\}
+%%}{
+%%	\hastype{\Gamma}{\ecase{e}{x}{D_i}{\overline{y}_i}{e_i}}{\tau}
+%%}[\rtcase]
+%%$$
 $$
 \inference{
 }{
@@ -317,14 +342,14 @@ $$
 	\iswellformed{\Gamma}{\tfun{x}{\tau_x}{\tau}}
 }[\rwfun]
 $$
-$$
-\inference{
-	\forall i . \iswellformed{\Gamma}{\tau_i} &&
-	\hastypebase{\erase{\Gamma}, v \colon \erase{\tconref{T}{\tau}{v}{e}}}{e}{\tbool}
-}{
-	\iswellformed{\Gamma}{\tconref{T}{\tau}{v}{e}}
-}[\rwcon]
-$$
+%%$$
+%%\inference{
+%%	\forall i . \iswellformed{\Gamma}{\tau_i} &&
+%%	\hastypebase{\erase{\Gamma}, v \colon \erase{\tconref{T}{\tau}{v}{e}}}{e}{\tbool}
+%%}{
+%%	\iswellformed{\Gamma}{\tconref{T}{\tau}{v}{e}}
+%%}[\rwcon]
+%%$$
 
 \hfill\mbox{\issubtype{\Gamma}{\tau}{\tau}}
 $$
@@ -341,16 +366,16 @@ $$
 	\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}
 }[\rsubfun]
 $$
-$$
-\inference{
-	\forall i. \issubtype{\Gamma}{\tau}{\tau'} &&
-	\issubref{\Gamma, v:\tcon{T}{\overline{\tau}}}{e}{e'}
-}{
-	\issubtype{\Gamma}
-		{\tconref{T}{\overline{\tau}}{v}{e}}
-		{\tconref{T}{\overline{\tau'}}{v}{e'}}
-}[\rsubcon]
-$$
+%%$$
+%%\inference{
+%%	\forall i. \issubtype{\Gamma}{\tau}{\tau'} &&
+%%	\issubref{\Gamma, v:\tcon{T}{\overline{\tau}}}{e}{e'}
+%%}{
+%%	\issubtype{\Gamma}
+%%		{\tconref{T}{\overline{\tau}}{v}{e}}
+%%		{\tconref{T}{\overline{\tau'}}{v}{e'}}
+%%}[\rsubcon]
+%%$$
 
 \hfill\mbox{\issubref{\Gamma}{e}{e}}
 $$
@@ -480,7 +505,7 @@ $$
 $$
 \begin{array}{rllll}
 \eval{\ecase{e}{x}{D_i}{\overline{y}}{e_i}&}
-	 {&\ecase{e'}{x}{D_i}{line{y}}{e_i}} & \text{if } \eval{e}{e'} &\\
+	 {&\ecase{e'}{x}{D_i}{\overline{y}}{e_i}} & \text{if } \eval{e}{e'} &\\
 \eval	{\ecase{\eapp{D_j}{\overline{e'}}}{x}{D_i}{\overline{y}}{e_i}&}
 		{&e_j\sub{y_l}{e'_l}} &
 \end{array}
