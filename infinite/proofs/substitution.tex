@@ -20,13 +20,13 @@ By inversion
 	\generalconditionImpl{(\theta\sub{x}{e'_x}\theta'\sub{v}{e})e_1}{(\theta\sub{x}{e'_x}\theta'\sub{v}{e})e_2}
 	\end{align*}
 
-But \hastype{\Gamma}{e_x}{\tau_x}, so \shastype{\Gamma}{e_x}{\tau_x}, so
+Since \shastype{\Gamma}{e_x}{\tau_x}, so
 	\begin{align*}
 	\forall &\theta, \theta',e .
 	\iswellformed{\Gamma,x\colon\tau_x, \Gamma',v:b}{\theta \sub{x}{e_x}\theta'\sub{v}{e}}\\& \Rightarrow
 	\generalconditionImpl{(\theta\sub{x}{e_x}\theta'\sub{v}{e})e_1}{(\theta\sub{x}{e_x}\theta'\sub{v}{e})e_2}
 	\end{align*}
-Or \hastype{\Gamma}{e_x}{\tau_x}, so \shastype{\Gamma}{e_x}{\tau_x}, so
+Since \shastype{\Gamma}{e_x}{\tau_x}, so
 	\begin{align*}
 	\forall &\theta, \theta',e .
 	\iswellformed{\Gamma,\sub{x}{e_x}\Gamma',v:b}{\theta\theta'\sub{v}{e}}\\& \Rightarrow
@@ -97,10 +97,10 @@ By rule \rtexact
 Or
 	$$\hastype{\Gamma, \sub{x}{e_x} \Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
 \item \rtvar Assume 
-	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+	$$\hastype{\Gamma, x\colon\tau'_x, \Gamma'}{e}{\tau}$$
 where $e \equiv y$.
 By inversion 
-$$(y,\tau )\in \Gamma, x\colon\tau_x, \Gamma'$$
+$$(y,\tau )\in \Gamma, x\colon\tau'_x, \Gamma'$$
 Assume
 $$(y,\tau)\in \Gamma$$
 By rule \rtvar
@@ -112,15 +112,15 @@ So,
 $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
 
 Assume
-$$(y,\tau) \equiv (x,\tau _x)$$
+$$y \equiv x$$
 By lemma's assumption 
-$$\hastype{\Gamma}{e_x}{\tau_x}$$
+$$\shastype{\Gamma}{e_x}{\tau_x}$$
 so
-$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tau_x}$$
+$$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tau'_x}$$
 Since $x = y$, $e\sub{x}{e_x} \equiv e_x$.
 Also, since $x \notin Dom(\Gamma)$ 
-it cannot appear in $\tau$,so
-$\tau\sub{x}{e_x} \equiv \tau \equiv \tau_x$.
+it cannot appear in $\tau'_x$,so
+$\tau\sub{x}{e_x} \equiv \tau \equiv \tau'_x$.
 So,
 $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
 
@@ -151,7 +151,7 @@ $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
 Assume
 $$y \equiv x$$
 By lemma's assumption 
-$$\hastype{\Gamma}{e_x}{\tau_x}$$
+$$\shastype{\Gamma}{e_x}{\tau_x}$$
 and since each expression has at most one unrefined type
 $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e_x}{\tref{v}{b}{e''}}$$
 By rule \rtexact we get
@@ -169,12 +169,57 @@ Also, $e\sub{x}{e_x}\equiv e \equiv y$ and $\tau\sub{x}{e_x} =\tau$.
 By which and rule \rtvar, we get
 $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
 
-\item\rtconst
+\item Case \rtconst.
 Assume 
 	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
-where $e \equiv c$ and $\tau\equiv\ty{c}$.
+where $e \equiv w$ and $\tau\equiv\ty{w}$.
 Since $e\sub{x}{e_x} \equiv e$ and $\tau\sub{x}{e_x}\equiv\tau$
 $$\hastype{\Gamma,\sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
+\item Case \rtcase.
+Assume 
+	$$\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tau}$$
+where $e \equiv \ecase{e}{y}{\dcti}{\overline{y}_i}{e_i}$.
+By inversion:
+$$
+	\hastype{\Gamma, x\colon\tau_x, \Gamma'}{e}{\tref{v}{T}{e_T}}\ (1)\qquad
+	\iswellformed{\Gamma, x\colon\tau_x, \Gamma'}{\tau}\ (2)
+$$
+$$
+	\tforalli{T}. \left\lbrace
+	\begin{array}{ll}
+ 	\ty{\dcti} = \overline{x\colon\tau_D}\rightarrow \tref{v}{T}{e'_T} \qquad
+ 	\theta = \sub{x}{y_i} \cr
+	\hastype{\Gamma, x\colon\tau_x, \Gamma', \overline{y_i\colon\theta\ \tau_{\dcti}}, 
+				y\colon \tref{v}{T}{e_T \land \theta e'_T}
+				}{e_i}{\tau}\ (3i)
+	\end{array} \right.
+$$
+By IH on $(1)$ and $(3i)$ and \ref{proof:sub:wf} on $(2)$
+$$
+	\hastype{\Gamma, \sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tref{v}{T}{e_T\sub{x}{e_x}}}\ (4)
+	\iswellformed{\Gamma, \sub{x}{e_x}\Gamma'}{\tau\sub{x}{e_x}}\ (5)
+$$
+$$
+	\hastype{\Gamma, \sub{x}{e_x}\Gamma', \overline{y_i\colon\theta\ \tau_{\dcti}\sub{x}{e_x}}, 
+				y\colon \tref{v}{T}{e_T \land \theta e'_T}\sub{x}{e_x}
+				}{e_i\sub{x}{e_x}}{\tau\sub{x}{e_x}}\ (6i)
+$$
+Since $x$ does not appear free in $\ty{\dcti}$, or$\ty{\dcti}\sub{x}{e_x} = \ty{\dcti}$, 
+we get
+$$
+	\tforalli{T}. \left\lbrace
+	\begin{array}{ll}
+ 	\ty{\dcti} = \overline{x\colon\tau_{\dcti}}\rightarrow \tref{v}{T}{e'_T} \qquad
+ 	\theta = \sub{x}{y_i} \cr
+	\hastype{\Gamma, \sub{x}{e_x}\Gamma', \overline{y_i\colon\theta\ \tau_{\dcti}}, 
+				y\colon \tref{v}{T}{e_T\sub{x}{e_x} \land \theta e'_T}
+				}{e_i\sub{x}{e_x}}{\tau\sub{x}{e_x}}
+	\end{array} \right.
+$$
+By which, $(4)$, $(5)$ and rule \rtcase we get
+$$\hastype{\Gamma, \sub{x}{e_x}\Gamma'}{e\sub{x}{e_x}}{\tau\sub{x}{e_x}}$$
+
 
 \item\rtsub
 Assume 

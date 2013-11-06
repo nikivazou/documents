@@ -115,10 +115,13 @@ $$\forall e.
  e\in\interp{\tref{v}{b}{e_r}} \Rightarrow e \in \interp{\tref{v}{b}{v \eqb{b} e}}$$
 which holds, as by the definition of \eqb{b}
 $$\generalconditionImplOne{e\eqb{b}e}$$
-\item\rtconst Assume
+\item\rtconst. Assume
 $$\hastype{\Gamma}{e}{\tau}$$
-where $e \equiv c$ and $\tau\equiv\ty{c}$.
-Then \shastype{\Gamma}{e}{\tau} holds by the definition of constants.
+where $e \equiv w$  and $\tau\equiv\ty{c}$.
+Then \shastype{\Gamma}{e}{\tau} holds by Definition \ref{def:constants}.
+\item \rtcase It follows from the definition of \interp{\tref{v}{T}{e}}
+using that $$\validi{e_T} \land \validi{theta e'_T} \Rightarrow \validi{e_T \land \theta e'_T}$$
+to prove that $e \in {\tref{v}{T}{e_T \land theta e'_T}}$
 \item\rtsub Assume 
 $$	\hastype{\Gamma}{e}{\tau}$$
 By inversion

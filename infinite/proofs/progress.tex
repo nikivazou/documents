@@ -30,6 +30,9 @@ $$
 
 We split cases on the structure of $e$.
 \begin{itemize}
+\item $e\equiv \eapp{(\eapp{\dcti}{\overline{e}})}{e'}$.
+Then, $e$ is a value.
+
 \item $e\equiv \eapp{c}{v_2}$.
 Then, $e'\equiv\interp{c}(v_2)$.
 
@@ -43,4 +46,19 @@ Then, $e' \equiv e_x\sub{x}{e_2}$.
 Then, by IH on $(2)$ \eval{e_1}{e_1'} and 
 $e'\equiv\eapp{e_1'}{e_2}$.
 \end{itemize}
+\item Case \rtcase. Assume 
+$$
+	\hastype{\emptyset}{e}{\tau}
+$$
+where $e\equiv\ecase{e_T}{x}{\dcti}{\overline{y}_i}{e_i}\ (1)$
+By inversion 
+$$\hastype{\emptyset}{e_T}{\tref{v}{T}{e_T}}$$
+
+If $e_T$ is a value, 
+then it can not be a function and by Definition \ref{def:constants}
+for some $1 \leq j \leq i_T$, $e_T \equiv \dct{j}\ \overline{e'_T}$.
+So, $$e' \equiv e_j\sub{y_j}{e'_T}$$
+
+Otherwise, by IH on $(1)$, there exists an $e'_T$, such that \eval{e_T}{e'_T}
+and $$e' \equiv \ecase{e'_T}{x}{\dcti}{\overline{y_i}}{e_i}$$
 \end{itemize}

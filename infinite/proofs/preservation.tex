@@ -47,6 +47,9 @@ $$
 
 We split cases on the structure of $e$.
 \begin{itemize}
+\item $e\equiv \eapp{\eapp{\dcti}{\overline{e}}}{e_2}$.
+Then there exists no $e'$ such that \eval{e}{e'}.
+
 \item $e\equiv \eapp{c}{v_2}$.
 Then, $e'\equiv\interp{c}(v_2)$.
 By Definition \ref{def:constants},
@@ -90,4 +93,60 @@ $$
 By which, $(3)$ and rule \rtapp we get
 $$	\hastype{\emptyset}{e'}{\tau}$$
 \end{itemize}
+
+\item Case \rtcase.
+Assume 
+$$
+	\hastype{\emptyset}{e}{\tau}
+$$
+where $e \equiv \ecase{e_T}{x}{\dcti}{\overline{y}_i}{e_i}$
+By inversion,
+$$
+	\hastype{\emptyset}{e_T}{\tref{v}{T}{e_r}}\ (1)\qquad \iswellformed{\emptyset}{\tau}\ (2)
+$$
+$$
+	\tforalli{T}. \left\lbrace
+	\begin{array}{ll}
+ 	\ty{\dcti} = \overline{x\colon\tau_{\dcti}}\rightarrow \tref{v}{T}{e'_r} \qquad
+ 	\theta = \sub{x}{y_i} \cr
+	\hastype{\overline{y_i\colon\theta\ \tau_{\dcti}}, 
+				x\colon \tref{v}{T}{e_r \land \theta e'_r}
+				}{e_i}{\tau}\ (3i)
+	\end{array} \right. \ (3)
+$$
+If there exists $e'_T$ such that \eval{e_T}{e_T'}, then
+$$e'\equiv\ecase{e'_T}{x}{\dcti}{\overline{y}_i}{e_i}$$
+By IH on $(1)$
+$$
+	\hastype{\emptyset}{e'_T}{\tref{v}{T}{e_r}}\ (4)
+$$
+By which, $(2)$, $(3)$ and rule \rtcase
+$$\hastype{\emptyset}{e'}{\tau}$$
+
+Otherwise, for some $1 \leq j \leq i_T$, $e_T\equiv \dct{j}\ \overline{e'_T}$ 
+and $e' \equiv e_j\sub{y_l}{e'_T}\sub{x}{e}$
+
+By inverting $(1)$ $n = | \overline{e'_T}|$ times, we get
+
+$$
+	\hastype{\emptyset}{{e'_T}_i}{\theta'\ {\tau_{\dct{j}}}_i}\ (5) \qquad
+	\hastype{\emptyset}{e_T}{\tref{v}{T}{\theta'\ e'_r}} \ (6)
+$$
+for $\theta' = \sub{x}{e'_T}$
+
+By $(1)$ $(6)$ and 
+$\validi{e_T} \land \validi{theta e'_T} \Rightarrow \validi{e_T \land \theta e'_T}$
+we get 
+$$
+	\shastype{\emptyset}{e_T}{\tref{v}{T}{e_T \land \theta'\ e'_r}}\ (7)
+$$
+
+By $(3j)$, $(5)$, $(7)$ and applying substitution lemma (Lemma \ref{lemma:substitution})
+$n+1$ times we get
+
+$$\hastype{\emptyset}{e_j\sub{y_l}{e'_T}\sub{x}{e}}{\tau\sub{y_l}{e'_T}\sub{x}{e}}\ (8)$$
+
+By $(2)$ $\tau$ does not have any free variables, so
+$$\hastype{\emptyset}{e'}{\tau}$$
+
 \end{itemize}

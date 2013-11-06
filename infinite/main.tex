@@ -40,12 +40,13 @@
 
 \newcommand\rimpl{\ensuremath{\Rightarrow}\rulename{-Base}}
 
-
+\newcommand\dcti{\dct{i}}
+\newcommand\dct[1]{\ensuremath{D^T_{#1}}}
 %% EXPRESSIONS
 \newcommand\efun[2]{\ensuremath{\lambda #1 . #2}}
 \newcommand\eapp[2]{\ensuremath{#1 \ #2}}
 \newcommand\edata[2]{\ensuremath{#1 \ #2}}
-\newcommand\ecase[5]{\ensuremath{\text{case}\ #1\ #2\ \text{of}\ \overline{\edata{#3}{#4} \rightarrow #5}}}
+\newcommand\ecase[5]{\ensuremath{\text{case}_T\ #1\ #2\ \text{of}\ \overline{\edata{#3}{#4} \rightarrow #5}}}
 \newcommand\elet[3]{\ensuremath{\text{let}\ #1 = #2\ \text{in}\ #3}}
 \newcommand\erec[3]{\ensuremath{\mu #1 \lambda #2 . #3}}
 
@@ -87,7 +88,7 @@
 %% general condition interp can be any condition in which 
 %% the second argument appears in positive places
 
-
+\newcommand\tforalli[1]{\ensuremath{\forall (1\leq i\leq i_{#1})}}
 
 %OTHER
 \newcommand\ty[1]{\ensuremath{\text{ty}({#1})}}
@@ -115,25 +116,36 @@ $$
   & ::= 
   &   	 c 
   \spmid \efun{x}{e} 
-  \spmid \edata{D}{\overline{e}}
+  \spmid \edata{\dcti}{\overline{e}}
   \\[0.05in] 
 
+\emphbf{Constants} \quad 
+  & w
+  & ::= 
+  &   	 c 
+  \spmid \dcti 
+  \\[0.05in] 
 
 \emphbf{Expressions} \quad 
   & e
   & ::= 
-  &   	 c 
+  &   	 w
   \spmid \efun{x}{e} 
   \spmid x 
-  \spmid D 
   \spmid \eapp{e}{e}  
-  \\ &&& \ecase{e}{x}{D}{\overline{x}}{e}
+  \\ &&& \ecase{e}{x}{\dcti}{\overline{x}}{e}
+  \\[0.05in] 
+
+\emphbf{Basic Types} \quad 
+  & b'
+  & ::=  
+  & 	\tint \spmid \tbool 
   \\[0.05in] 
 
 \emphbf{Basic Types} \quad 
   & b
   & ::=  
-  & 	\tint \spmid \tbool \spmid T
+  & 	b' \spmid T
   \\[0.05in] 
 
 \emphbf{Types} \quad 
@@ -152,13 +164,13 @@ $$
 $$
 
 \begin{itemize}
-\item $\texttt{Bool}\in T$
-\item $\texttt{True}, \texttt{False} \in D$
+\item $\texttt{Bool}\in T$, $i_\texttt{Bool} = 2$
+\item $\texttt{True}  \equiv D^{\texttt{Bool}}_1, \texttt{False} \equiv D^{\texttt{Bool}}_2$
 \item $\ty{\texttt{True}} = \tref{v}{\texttt{Bool}}{v \Leftrightarrow \etrue}$, and
 $\ty{\texttt{False}} = \tref{v}{\texttt{Bool}}{v \Leftrightarrow \efalse}$
 \item
 $$\text{if}\ e\ \text{then}\ e_1\ \text{else}\ e_2 \doteq 
-\text{case}\ e\ x\ \text{of}\ \{\texttt{True}\Rightarrow e_1;\texttt{False}\Rightarrow e_2 \}
+\text{case}_{\texttt{Bool}}\ e\ x\ \text{of}\ \{\texttt{True}\Rightarrow e_1;\texttt{False}\Rightarrow e_2 \}
 $$
 \end{itemize}
 \section*{Erasing}
@@ -193,16 +205,34 @@ Let \fini{\star} and \validi{\star} be predicates on expressions such that
 \item For any $x, e, e_r, \theta$, if \eval{e}{e'} then 
 	\generalconditionImpl{\theta\ e_r\sub{x}{e'}}{\theta\ e_r\sub{x}{e}} and
 	\generalconditionImpl{\theta\ e_r\sub{x}{e}}{\theta\ e_r\sub{x}{e'}}.
+
+\item For any $e_1, e_2$, 
+$$\validi{e_1} \land \validi{e_2} \Rightarrow \validi{e_1 \land e_2}$$
 \end{enumerate} 
 \end{definition}
 
 $$
 \begin{array}{lll}
-\interp{\tref{v}{b}{e_v}} &=
+\interp{\tref{v}{b'}{e_v}} &=
 	\{e \mid & \hastype{}{e}{b} 
 	\land 
 	\generalconditionInterp{e}{e_v\sub{v}{e}} 
 	\}\\
+\interp{\tref{v}{T}{e_T}} &=
+	\{e \mid & \hastype{}{e}{b} 
+	\land 
+	\generalconditionInterp{e}{e_T\sub{v}{e}} 
+	\}\\
+	&\cap\
+	\{ e \mid & \tforalli{T} \{
+		\dcti \in \interp{\overline{x\colon\tau_{\dcti}} \rightarrow \tref{v}{T}{e'_T}}
+		\land \theta = \sub{x}{e_{y_i}} \land \forall e_{y_i} \in \interp{\theta\ t_{\dcti}} \\
+		&& e \in \interp{\tref{v}{T}{\theta e'_T}} 
+				\Rightarrow e_i\sub{x}{e}\sub{y_i}{e_{y_i}} \in \interp{\tau}	
+	\} \\
+	&&\Rightarrow \ecase{e}{x}{\dcti}{\overline{y_i}}{e_i} \in \interp{\tau}
+	\}
+	\\
 \interp{\tfun{x}{\tau_x}{\tau}} &=
 	\{e \mid & \hastype{}{e}{\erase{\tau_x} \rightarrow \erase{\tau}} 
 	\land 
@@ -262,7 +292,7 @@ $$
 $$
 \inference{
 }{
-	\hastype{\Gamma}{c}{\ty{c}}
+	\hastype{\Gamma}{w}{\ty{w}}
 }[\rtconst]
 \qquad
 \inference{
@@ -290,17 +320,17 @@ $$
 $$
 $$
 \inference{
-	\hastype{\Gamma}{e}{\tref{v}{T}{e_T}} \\
-	\forall i. \left\lbrace
+	\hastype{\Gamma}{e}{\tref{v}{T}{e_T}} && \iswellformed{\Gamma}{\tau}\\
+	\tforalli{T}. \left\lbrace
 	\begin{array}{ll}
- 	\ty{D_i} = \overline{x\colon\tau_D}\rightarrow \tref{v}{T}{e'_T} \qquad
+ 	\ty{\dcti} = \overline{x\colon\tau_{\dcti}}\rightarrow \tref{v}{T}{e'_T} \qquad
  	\theta = \sub{x}{y_i} \cr
-	\hastype{\Gamma, \overline{y_i\colon\theta\ \tau_D}, 
+	\hastype{\Gamma, \overline{y_i\colon\theta\ \tau_{\dcti}}, 
 				x\colon \tref{v}{T}{e_T \land \theta e'_T}
 				}{e_i}{\tau}
 	\end{array} \right.
 }{
-	\hastype{\Gamma}{\ecase{e}{x}{D_i}{\overline{y}_i}{e_i}}{\tau}
+	\hastype{\Gamma}{\ecase{e}{x}{\dcti}{\overline{y}_i}{e_i}}{\tau}
 }[\rtcase]
 $$
 
@@ -309,23 +339,16 @@ $$
 %%\inference{
 %%	\hastype{\Gamma}{e}{\tconref{T}{\overline{\tau}}{v}{e_T}} \\
 %%	\forall i. \{ 
-%%		\ty{D_i} = \overline{x\colon\tau_D}\rightarrow \tconref{T}{\overline{\alpha}}{v}{e'_T} \\
+%%		\ty{\dcti} = \overline{x\colon\tau_D}\rightarrow \tconref{T}{\overline{\alpha}}{v}{e'_T} \\
 %%		\theta_x = \sub{x}{y} && \theta_\alpha = \sub{\alpha}{\tau} && \theta = \theta_x\ \theta_\alpha\\
 %%		\qquad \hastype{\Gamma, \overline{y\colon\theta\ \tau_D}, 
 %%						x\colon \tconref{T}{\overline{\tau}}{v}{e_T \land \theta e'_T}
 %%						}{e_i}{\tau}
 %%				\}
 %%}{
-%%	\hastype{\Gamma}{\ecase{e}{x}{D_i}{\overline{y}_i}{e_i}}{\tau}
+%%	\hastype{\Gamma}{\ecase{e}{x}{\dcti}{\overline{y}_i}{e_i}}{\tau}
 %%}[\rtcase]
 %%$$
-$$
-\inference{
-}{
-	\hastype{\Gamma}{D}{\ty{D}}
-}[\rtdata]
-$$
-
 
 \hfill\mbox{\iswellformed{\Gamma}{\tau}}
 $$
@@ -411,25 +434,33 @@ $$
 $$
 
 
-\section*{Constants}
+\section*{Constants and Data Constructors}
 \begin{definition}\label{def:constants}
-For each constant $c$, 
+For each constant or data constructor $w$
+
+\newcommand\const{\ensuremath{w}}
 \begin{enumerate}
-\item \hastype{\emptyset}{c}{\ty{c}} and \iswellformed{}{\ty{c}}
-\item If $\ty{c} = \tfun{x}{\tau_x}{\tau}$, then for each $v$ such that
-\hastype{\emptyset}{v}{\tau_x} $\interp{c}(v)$ is defined and
-\hastype{}{\interp{c}(v)}{\tau\sub{x}{v}}
-\item If $\ty{c} = \tref{v}{b}{e}$, 
-then \generalconditionInterp{c}{e\sub{v}{c}} and 
-$\forall c'\ c' \neq c. \lnot (\generalconditionInterp{c}{e\sub{v}{c'}})$ 
+\item \hastype{\emptyset}{\const}{\ty{\const}} and \iswellformed{}{\ty{\const}}
+\item If $\ty{\const} = \tfun{x}{\tau_x}{\tau}$, then for each $v$ such that
+\hastype{\emptyset}{v}{\tau_x} $\interp{\const}(v)$ is defined and
+\hastype{}{\interp{\const}(v)}{\tau\sub{x}{v}}
+
+Also, for all $e\in\interp{\tau_x}$, we have $\eapp{\const}{e}\in\interp{\tau\sub{x}{e}}$
+
+\item If $\ty{\const} = \tref{v}{b}{e}$, 
+then \generalconditionInterp{\const}{e\sub{v}{\const}} and 
+$\forall \const'\ \const' \neq \const. \lnot (\generalconditionInterp{\const}{e\sub{v}{\const'}})$ 
 \end{enumerate}
-Moreover, for any base type $b$ \eq{b} is a constant and 
+Moreover, for any base type $b$, \eqb{b} is a constant and 
 \begin{itemize}
 \item For any expression $e$ we have 
 $$\generalconditionImplOne{e \eqb{b} e}$$
 \item For any base type $b$ 
 $$\ty{=_b} \equiv \tfun{x}{b}{\tfun{y}{b}{\tbool}}$$
 \end{itemize}
+
+For each $T$ there are exactly $i_T$ constants with result type $\tref{v}{T}{e_T}$, 
+namely   $\dcti$, $\forall 1 \leq i \leq i_T$.
 \end{definition}
 
 \section*{Semantic Typing}
@@ -455,7 +486,7 @@ $$\ty{=_b} \equiv \tfun{x}{b}{\tfun{y}{b}{\tbool}}$$
 
 
 \begin{lemma}[Substitution]\label{lemma:substitution}
-If \hastype{\Gamma}{e_x}{\tau_x} and \iswellformed{}{\Gamma, x\colon\tau_x ,\Gamma'}, then 
+If \shastype{\Gamma}{e_x}{\tau_x} and \iswellformed{}{\Gamma, x\colon\tau_x ,\Gamma'}, then 
 \begin{enumerate}
 \item If 
 	\issubtype{\Gamma, x\colon\tau_x, \Gamma'}{\tau_1}{\tau_2}
@@ -504,10 +535,10 @@ $$
 $$
 $$
 \begin{array}{rllll}
-\eval{\ecase{e}{x}{D_i}{\overline{y}}{e_i}&}
-	 {&\ecase{e'}{x}{D_i}{\overline{y}}{e_i}} & \text{if } \eval{e}{e'} &\\
-\eval	{\ecase{\eapp{D_j}{\overline{e'}}}{x}{D_i}{\overline{y}}{e_i}&}
-		{&e_j\sub{y_l}{e'_l}} &
+\eval{\ecase{e}{x}{\dcti}{\overline{y}}{e_i}&}
+	 {&\ecase{e'}{x}{\dcti}{\overline{y}}{e_i}} & \text{if } \eval{e}{e'} &\\
+\eval	{\ecase{\eapp{\dct{j}}{\overline{e'}}}{x}{\dcti}{\overline{y}}{e_i}&}
+		{&e_j\sub{y_l}{e'_l}\sub{x}{\eapp{\dct{j}}{\overline{e'}}}} &
 \end{array}
 $$
 
