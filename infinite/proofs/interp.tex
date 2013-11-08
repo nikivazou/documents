@@ -39,23 +39,33 @@ $$
 $$
 
 \item\rsubfun Assume
-$$\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}$$
+$$
+	\issubtype{\Gamma}{\tfunref{x}{\tau_x}{\tau}{v}{e_1}}{\tfunref{x}{\tau'_x}{\tau'}{v}{e_2}}
+$$
 By inversion we have
-$$	\issubtype{\Gamma}{\tau'_x}{\tau_x} \qquad
-	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'}
+$$	
+	\issubtype{\Gamma}{\tau'_x}{\tau_x} \qquad
+	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'} 
+%% TFUNREF	\qquad
+%% TFUNREF 	\issubref{\Gamma, v:\tfun{x}{\tau_x}{\tau}}{e_1}{e_2}
 $$
 By IH
-$$	\sissubtype{\Gamma}{\tau'_x}{\tau_x} (1) \qquad
+$$	
+	\sissubtype{\Gamma}{\tau'_x}{\tau_x} (1) \qquad
 	\sissubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'} (2)
 $$
 We want to show that 
-$$\sissubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}$$
+$$
+	\sissubtype{\Gamma}
+		{\tfunref{x}{\tau_x}{\tau}{v}{e_1}}
+		{\tfunref{x}{\tau'_x}{\tau'}{v}{e_2}}
+$$
 Equivalently
 $$	
 	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow 
-	\interp{\theta\ x:\tau_x \rightarrow \tau} 
+	\interp{\theta\ (\tfunref{x}{\tau_x}{\tau}{v}{e_1})} 
 	\subseteq 
-	\interp{\theta\ x:\tau'_x \rightarrow \tau'}
+	\interp{\theta\ (\tfunref{x}{\tau'_x}{\tau'}{v}{e_2})}
 $$
 Equivalently
 \begin{align*}
@@ -160,7 +170,8 @@ $$
 \forall e_x . e_x \in \interp{\tau'_x} \Rightarrow
 	\theta\ \eapp{e}{e_x} \in \interp{\theta \ (\tau'\sub{x}{e_x})}\\
 $$
-Moreover, $\hastype{e}{\erase{\tau'_x}\rightarrow{\erase{\tau}}}$.
+Moreover, $\hastypebase{}{e}{\erase{\tau'_x}\rightarrow{\erase{\tau}}}$
+	and  $\validi{\etrue}$.
 So,
 $$	
 \forall \theta . \iswellformed{\Gamma}{\theta}\ \theta\ e\in \interp{\theta\ \tau}
@@ -172,12 +183,12 @@ $$\hastype{\Gamma}{e}{\tau}$$
 where $e\equiv\eapp{e_1}{e_2}$ and $\tau\equiv\tau'\sub{x}{e_2}$.
 By inversion:
 $$
-	\hastype{\Gamma}{e_1}{(\tfun{x}{\tau'_{x}}{\tau'})}\ (1)\qquad
+	\hastype{\Gamma}{e_1}{(\tfunref{x}{\tau'_{x}}{\tau'}{v}{e_r})}\ (1)\qquad
 	\hastype{\Gamma}{e_2}{\tau'_{x}}\ (2)
 $$
 By IH we get
 $$
-	\shastype{\Gamma}{e_1}{(\tfun{x}{\tau'_{x}}{\tau'})}\ (3)\qquad
+	\shastype{\Gamma}{e_1}{(\tfunref{x}{\tau'_{x}}{\tau'}{v}{e_r})}\ (3)\qquad
 	\shastype{\Gamma}{e_2}{\tau'_{x}}\ (4)
 $$
 So 

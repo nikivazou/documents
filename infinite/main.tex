@@ -61,6 +61,8 @@
 \newcommand\tconref[4]{\tref{#3}{\tcon{#1}{#2}}{#4}}
 \newcommand\tcon[2]{\ensuremath{#1\ #2}}
 \newcommand\tfun[3]{\ensuremath{#1\colon #2 \rightarrow #3}}
+\newcommand\tfunref[5]{\tfun{#1}{#2}{#3}}
+% \newcommand\tfunref[5]{\tref{#4}{(\tfun{#1}{#2}{#3})}{#5}}
 
 %% OTHER
 \newcommand\eqb[1]{\ensuremath{=_{#1}}}
@@ -98,8 +100,8 @@
 \newcommand\interp[1]{\ensuremath{[|#1|]}}
 \newcommand\eval[2]{\ensuremath{#1 \hookrightarrow #2}}
 \newcommand\evals[2]{\ensuremath{#1 \hookrightarrow^\star #2}}
-\newcommand\hastype[3]{\ensuremath{#1 \vdash #2 \colon #3}}
-\newcommand\hastypebase[3]{\ensuremath{#1 \vdash_B #2 \colon #3}}
+\newcommand\hastype[3]{\ensuremath{#1 \vdash #2 : #3}}
+\newcommand\hastypebase[3]{\ensuremath{#1 \vdash_B #2 : #3}}
 \newcommand\shastype[3]{\ensuremath{#1 \vdash #2 \in #3}}
 \newcommand\iswellformed[2]{\ensuremath{#1 \vdash #2}}
 \newcommand\biswellformed[2]{\ensuremath{#1 \vdash_B #2}}
@@ -152,7 +154,7 @@ $$
   & \tau
   & ::=  
   & 	\tref{v}{b}{e}
-  \spmid \tfun{x}{\tau}{\tau}    
+  \spmid \tfunref{x}{\tau}{\tau}{v}{e}    
   \\[0.05in] 
 
 \emphbf{Environment} \quad 
@@ -176,7 +178,7 @@ $$
 \section*{Erasing}
 \begin{align*}
 \erase{\tref{v}{b}{e}}&=b\\
-\erase{\tfun{x}{\tau_x}{\tau}}&= \erase{\tau_x} \rightarrow \erase{\tau}\\
+\erase{\tfunref{x}{\tau_x}{\tau}{v}{e}}&= \erase{\tau_x} \rightarrow \erase{\tau}\\
 % \erase{\tconref{T}{\overline{\tau}}{v}{e}}&= \tcon{T}\overline{\erase{\tau}}
 \end{align*}
 
@@ -188,7 +190,8 @@ $$
 \section*{Substitutions}
 \begin{align*}
 (\tref{v}{b}{e})\sub{y}{e_y} &=\tref{v}{b}{e\sub{y}{e_y}}\\
-(\tfun{x}{\tau_x}{\tau})\sub{y}{e_y} &=\tfun{x}{(\tau_x\sub{y}{e_y})}{(\tau\sub{y}{e_y})}\\
+(\tfunref{x}{\tau_x}{\tau}{v}{e})\sub{y}{e_y} &=
+	\tfunref{x}{(\tau_x\sub{y}{e_y})}{(\tau\sub{y}{e_y})}{v}{e\sub{y}{e_y}}\\
 % (\tconref{T}{\overline{\tau}}{v}{e})\sub{y}{e_y} 
 % 	&=\tconref{T}{\overline{\tau\sub{y}{e_y}}}{v}{e\sub{y}{e_y}}
 \end{align*}
@@ -208,6 +211,8 @@ Let \fini{\star} and \validi{\star} be predicates on expressions such that
 
 \item For any $e_1, e_2$, 
 $$\validi{e_1} \land \validi{e_2} \Rightarrow \validi{e_1 \land e_2}$$
+
+\item $$\validi{\etrue}$$
 \end{enumerate} 
 \end{definition}
 
@@ -225,17 +230,19 @@ $$
 	\}\\
 	&\cap\
 	\{ e \mid & \tforalli{T} \{
-		\dcti \in \interp{\overline{x\colon\tau_{\dcti}} \rightarrow \tref{v}{T}{e'_T}}
-		\land \theta = \sub{x}{e_{y_i}} \land \forall e_{y_i} \in \interp{\theta\ t_{\dcti}} \\
+		\dcti \in \interp{\overline{x\colon\tau_{\dcti}} \rightarrow \tref{v}{T}{e'_T}}\\
+		&& \land\ \theta = \sub{x}{e_{y_i}} \land \forall e_{y_i} \in \interp{\theta\ t_{\dcti}} \\
 		&& e \in \interp{\tref{v}{T}{\theta e'_T}} 
 				\Rightarrow e_i\sub{x}{e}\sub{y_i}{e_{y_i}} \in \interp{\tau}	
 	\} \\
 	&&\Rightarrow \ecase{e}{x}{\dcti}{\overline{y_i}}{e_i} \in \interp{\tau}
 	\}
 	\\
-\interp{\tfun{x}{\tau_x}{\tau}} &=
+\interp{\tfunref{x}{\tau_x}{\tau}{v}{e_v}} &=
 	\{e \mid & \hastype{}{e}{\erase{\tau_x} \rightarrow \erase{\tau}} 
 	\land 
+%% TFUNREF 	\generalconditionInterp{e}{e_v\sub{v}{e}} \\
+%% TFUNREF 	&& \land \ 
 	\forall e_x \in \interp{\tau_x}. \
 	 \eapp{e}{e_x} \in \interp{\tau\sub{x}{e_x}} 
 	 \}\\
@@ -253,7 +260,7 @@ $$
 
 %% ASSUMING ALL ARGUMENTS ARE COVARIANT!
 \section*{Typing}
-
+%% FFUNREF $$\tfun{x}{\tau_x}{\tau} \doteq \tfunref{x}{\tau_x}{\tau}{v}{\etrue}$$
 \hfill\mbox{\hastype{\Gamma}{e}{\tau}}
 
 %% unifying these rules for simplicity, 
@@ -284,7 +291,7 @@ $$
 \qquad
 \inference{
 	(x,\tau) \in \Gamma &&
-	\tau \equiv \tfun{x'}{\tau_x'}{\tau'}
+	\tau \neq (x,\tref{v}{b}{e})
 }{
 	\hastype{\Gamma}{x}{\tau}
 }[\rtvar]
@@ -312,7 +319,7 @@ $$
 }[\rtfun]
 \qquad
 \inference{
-	\hastype{\Gamma}{e_1}{(\tfun{x}{\tau_{x}}{\tau})} &&
+	\hastype{\Gamma}{e_1}{(\tfunref{x}{\tau_{x}}{\tau}{v}{e_v})} &&
 	\hastype{\Gamma}{e_2}{\tau_{x}}
 }{
 	\hastype{\Gamma}{\eapp{e_1}{e_2}}{\tau\sub{x}{e_2}}
@@ -359,10 +366,11 @@ $$
 }[\rwbase]
 \qquad
 \inference{
+%%TFUNREF	\hastypebase{\erase{\Gamma}, v\colon b}{e}{\tbool} &&
 	\iswellformed{\Gamma}{\tau_x} &&
 	\iswellformed{\Gamma, x \colon \tau_x}{\tau}
 }{
-	\iswellformed{\Gamma}{\tfun{x}{\tau_x}{\tau}}
+	\iswellformed{\Gamma}{\tfunref{x}{\tau_x}{\tau}{v}{e}}
 }[\rwfun]
 $$
 %%$$
@@ -383,10 +391,11 @@ $$
 }[\rsubbase]
 \qquad
 \inference{
+%% FUNREF	\issubref{\Gamma, v:\tfun{x}{\tau_x}{\tau}}{e_1}{e_2} \\
 	\issubtype{\Gamma}{\tau'_x}{\tau_x} &&
 	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'}
 }{
-	\issubtype{\Gamma}{x:\tau_x \rightarrow \tau}{x:\tau'_x \rightarrow \tau'}
+	\issubtype{\Gamma}{\tfunref{x}{\tau_x}{\tau}{v}{e_1}}{\tfunref{x}{\tau'_x}{\tau'}{v}{e_2}}
 }[\rsubfun]
 $$
 %%$$
@@ -478,7 +487,7 @@ namely   $\dcti$, $\forall 1 \leq i \leq i_T$.
 \item If \hastype{\Gamma}{e}{\tau} then \shastype{\Gamma}{e}{\tau} 
 \end{enumerate}
 \end{lemma}
-\showproof{
+{%\showproof{
 	\begin{proof}
 	\input{proofs/interp}
 	\end{proof}
