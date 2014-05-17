@@ -9,12 +9,28 @@
 \include{haskellListings}
 \usepackage{amsthm}
 
+
+
+\usepackage{color}
+\usepackage{ifthen}
+
+\newcommand{\isDecidable}{false} % true or false
+\newcommand\restrictdecidable[2]{%
+  \ifthenelse{\equal{\isDecidable}{true}}
+    {{\color{green}{{#1}}}}
+    {{\color{red}{{#2}}}}
+\xspace}
+
+
 \newtheorem{definition}{Definition}
 \newtheorem{lemma}{Lemma}
 \newtheorem{claim}{Claim}
 
+% writting
+
 %\newcommand\showproof[1]{#1}
 \newcommand\showproof[1]{\texttt{proved}}
+\newcommand\showprooftodo[1]{\texttt{TODO}}
 
 %% RULE NAMES
 \newcommand\rulename[1]{\textsc{#1}\xspace}
@@ -37,12 +53,14 @@
 \newcommand\rtdata{\rulename{T-Data}}
 \newcommand\rtfun{\rulename{T-Fun}}
 \newcommand\rtapp{\rulename{T-App}}
+\newcommand\rtlet{\rulename{T-Let}}
 
 \newcommand\rimpl{\ensuremath{\Rightarrow}\rulename{-Base}}
 
 \newcommand\dcti{\dct{i}}
 \newcommand\dct[1]{\ensuremath{D^T_{#1}}}
 %% EXPRESSIONS
+\newcommand\efix[1]{\ensuremath{\mathtt{fix}_{#1}\xspace}}
 \newcommand\efun[2]{\ensuremath{\lambda #1 . #2}}
 \newcommand\eapp[2]{\ensuremath{#1 \ #2}}
 \newcommand\edata[2]{\ensuremath{#1 \ #2}}
@@ -65,14 +83,18 @@
 % \newcommand\tfunref[5]{\tref{#4}{(\tfun{#1}{#2}{#3})}{#5}}
 
 %% OTHER
+
+\newcommand\crash{\ensuremath{\mathtt{crash}}}
 \newcommand\eqb[1]{\ensuremath{=_{#1}}}
 \newcommand\eq{\eqb{}}
 
 \newcommand\validn[2]{\ensuremath{\text{Valid}_{#2}\ (#1)}}
 \newcommand\finn[2]{\ensuremath{\text{Fin}_{#2}\ (#1)}}
 \newcommand\validi[1]{\ensuremath{\text{Valid}_{i}\ (#1)}}
-\newcommand\fini[1]{\ensuremath{\text{Fin}_{i}\ (#1)}}
-\newcommand\fin[1]{\ensuremath{\text{Fin}\ (#1)}}
+\newcommand\fini[1]{\ensuremath{\exists v. \evals{#1}{v}}}
+\newcommand\fin[1]{\ensuremath{\exists v. \evals{#1}{v}}}
+%\newcommand\fini[1]{\ensuremath{\text{Fin}_{i}\ (#1)}}
+%\newcommand\fin[1]{\ensuremath{\text{Fin}\ (#1)}}
 
 \newcommand\valid[1]{\ensuremath{\text{Valid}(#1)}}
 
@@ -100,7 +122,9 @@
 \newcommand\interp[1]{\ensuremath{[|#1|]}}
 \newcommand\eval[2]{\ensuremath{#1 \hookrightarrow #2}}
 \newcommand\evals[2]{\ensuremath{#1 \hookrightarrow^\star #2}}
+\newcommand\evalsi[3]{\ensuremath{#1 \hookrightarrow^{#3} #2}}
 \newcommand\hastype[3]{\ensuremath{#1 \vdash #2 : #3}}
+\newcommand\ispure[2]{\ensuremath{#1 \vdash_{\text{pure}} #2}}
 \newcommand\hastypebase[3]{\ensuremath{#1 \vdash_B #2 : #3}}
 \newcommand\shastype[3]{\ensuremath{#1 \vdash #2 \in #3}}
 \newcommand\iswellformed[2]{\ensuremath{#1 \vdash #2}}
@@ -110,72 +134,23 @@
 \newcommand\issubref[3]{\ensuremath{#1 \vdash #2 \Rightarrow #3}}
 \title{Refinements for Lazy Evaluation}
 \begin{document}
-\section*{Syntax}
-$$
-\begin{array}{rrcl}
-\emphbf{Value} \quad 
-  & v
-  & ::= 
-  &   	 c 
-  \spmid \efun{x}{e} 
-  \spmid \edata{\dcti}{\overline{e}}
-  \\[0.05in] 
 
-\emphbf{Constants} \quad 
-  & w
-  & ::= 
-  &   	 c 
-  \spmid \dcti 
-  \\[0.05in] 
-
-\emphbf{Expressions} \quad 
-  & e
-  & ::= 
-  &   	 w
-  \spmid \efun{x}{e} 
-  \spmid x 
-  \spmid \eapp{e}{e}  
-  \\ &&& \ecase{e}{x}{\dcti}{\overline{x}}{e}
-  \\[0.05in] 
-
-\emphbf{Basic Types} \quad 
-  & b'
-  & ::=  
-  & 	\tint \spmid \tbool 
-  \\[0.05in] 
-
-\emphbf{Basic Types} \quad 
-  & b
-  & ::=  
-  & 	b' \spmid T
-  \\[0.05in] 
-
-\emphbf{Types} \quad 
-  & \tau
-  & ::=  
-  & 	\tref{v}{b}{e}
-  \spmid \tfunref{x}{\tau}{\tau}{v}{e}    
-  \\[0.05in] 
-
-\emphbf{Environment} \quad 
-  & \Gamma
-  & ::= 
-  &     \emptyset \spmid x\colon \tau, \Gamma
-
-\end{array}
-$$
-
+\section{Language}
+\subsection{Syntax}
+\input{language}
 \begin{itemize}
 \item $\texttt{Bool}\in T$, $i_\texttt{Bool} = 2$
 \item $\texttt{True}  \equiv D^{\texttt{Bool}}_1, \texttt{False} \equiv D^{\texttt{Bool}}_2$
-\item $\ty{\texttt{True}} = \tref{v}{\texttt{Bool}}{v \Leftrightarrow \etrue}$, and
-$\ty{\texttt{False}} = \tref{v}{\texttt{Bool}}{v \Leftrightarrow \efalse}$
 \item
 $$\text{if}\ e\ \text{then}\ e_1\ \text{else}\ e_2 \doteq 
 \text{case}_{\texttt{Bool}}\ e\ x\ \text{of}\ \{\texttt{True}\Rightarrow e_1;\texttt{False}\Rightarrow e_2 \}
 $$
 \end{itemize}
-\section*{Erasing}
+\subsection{Operational Semantics}
+\input{operational}
+
+\section{Undecidable System}
+\subsection{Erasing}
 \begin{align*}
 \erase{\tref{v}{b}{e}}&=b\\
 \erase{\tfunref{x}{\tau_x}{\tau}{v}{e}}&= \erase{\tau_x} \rightarrow \erase{\tau}\\
@@ -187,7 +162,7 @@ $$
 \erase{x\colon\tau, \Gamma}&= x\colon\erase{\tau},\erase{\Gamma}
 \end{align*}
 
-\section*{Substitutions}
+\subsection{Substitutions}
 \begin{align*}
 (\tref{v}{b}{e})\sub{y}{e_y} &=\tref{v}{b}{e\sub{y}{e_y}}\\
 (\tfunref{x}{\tau_x}{\tau}{v}{e})\sub{y}{e_y} &=
@@ -196,15 +171,10 @@ $$
 % 	&=\tconref{T}{\overline{\tau\sub{y}{e_y}}}{v}{e\sub{y}{e_y}}
 \end{align*}
 
-\section*{Interpretations}
+\subsection{Interpretations}
 \begin{definition} \label{def:valid}
-Let \fini{\star} and \validi{\star} be predicates on expressions such that
+Let \validi{\star} be predicates on expressions such that
 \begin{enumerate}
-\item 
-	For \hastype{\emptyset}{e}{\tref{v}{b}{e_r}}
-	\generalconditionInterp{e}{e_r} is a ``meaningful''
-	soundness predicate.
-
 \item For any $x, e, e_r, \theta$, if \eval{e}{e'} then 
 	\generalconditionImpl{\theta\ e_r\sub{x}{e'}}{\theta\ e_r\sub{x}{e}} and
 	\generalconditionImpl{\theta\ e_r\sub{x}{e}}{\theta\ e_r\sub{x}{e'}}.
@@ -223,21 +193,32 @@ $$
 	\land 
 	\generalconditionInterp{e}{e_v\sub{v}{e}} 
 	\}\\
+%%\interp{\tref{v}{T}{e_T}} &=
+%%	\{e \mid & \hastype{}{e}{b} 
+%%	\land 
+%%	\generalconditionInterp{e}{e_T\sub{v}{e}} 
+%%	\}\\
+%%	&\cap\
+%%	\{ e \mid & \tforalli{T} \{
+%%		\dcti \in \interp{\overline{x\colon\tau_{\dcti}} \rightarrow \tref{v}{T}{e'_T}}\\
+%%		&& \land\ \theta = \sub{x}{e_{y_i}} \land \forall e_{y_i} \in \interp{\theta\ t_{\dcti}} \\
+%%		&& e \in \interp{\tref{v}{T}{\theta e'_T}} 
+%%				\Rightarrow e_i\sub{x}{e}\sub{y_i}{e_{y_i}} \in \interp{\tau}	
+%%	\} \\
+%%	&&\Rightarrow \ecase{e}{x}{\dcti}{\overline{y_i}}{e_i} \in \interp{\tau}
+%%	\}
+%%	\\
+
 \interp{\tref{v}{T}{e_T}} &=
-	\{e \mid & \hastype{}{e}{b} 
+	\{e \mid & \hastype{}{e}{T} 
 	\land 
-	\generalconditionInterp{e}{e_T\sub{v}{e}} 
-	\}\\
-	&\cap\
-	\{ e \mid & \tforalli{T} \{
+	\generalconditionInterp{e}{e_T\sub{v}{e}}\\
+		&&\land\ \evals{e}{v_e} \Rightarrow \{v_e = \dcti\ \overline{e_{y_i}} \land 
 		\dcti \in \interp{\overline{x\colon\tau_{\dcti}} \rightarrow \tref{v}{T}{e'_T}}\\
-		&& \land\ \theta = \sub{x}{e_{y_i}} \land \forall e_{y_i} \in \interp{\theta\ t_{\dcti}} \\
-		&& e \in \interp{\tref{v}{T}{\theta e'_T}} 
-				\Rightarrow e_i\sub{x}{e}\sub{y_i}{e_{y_i}} \in \interp{\tau}	
+		&& \land\ \theta = \sub{x}{e_{y_i}} \land e_{y_i} \in \interp{\theta\ t_{\dcti}} \land
+		 e \in \interp{\tref{v}{T}{\theta e'_T}}\} 
 	\} \\
-	&&\Rightarrow \ecase{e}{x}{\dcti}{\overline{y_i}}{e_i} \in \interp{\tau}
-	\}
-	\\
+
 \interp{\tfunref{x}{\tau_x}{\tau}{v}{e_v}} &=
 	\{e \mid & \hastype{}{e}{\erase{\tau_x} \rightarrow \erase{\tau}} 
 	\land 
@@ -258,207 +239,31 @@ $$
 \end{array}
 $$
 
-%% ASSUMING ALL ARGUMENTS ARE COVARIANT!
-\section*{Typing}
-%% FFUNREF $$\tfun{x}{\tau_x}{\tau} \doteq \tfunref{x}{\tau_x}{\tau}{v}{\etrue}$$
-\hfill\mbox{\hastype{\Gamma}{e}{\tau}}
-
-%% unifying these rules for simplicity, 
-%% You can fake it: every time you add a
-%% binding to env it should have 	v = x
-%% then I get this by implication
-%\rtvar
-%\rtvarbase
-%\rtconst
-%\rtsub
-%\rtexact
-%\rtfun
-%\rtapp
-%\rtcase
-$$
-\inference{
-	\hastype{\Gamma}{e}{\tref{v}{b}{e'}}
-}{
-	\hastype{\Gamma}{e}{\tref{v}{b}{v \eqb{b} e}}
-}[\rtexact]
-$$
-$$
-\inference{
-	(x,\tref{v}{b}{e}) \in \Gamma
-}{
-	\hastype{\Gamma}{x}{\tref{v}{b}{v \eqb{b} x}}
-}[\rtvarbase]
-\qquad
-\inference{
-	(x,\tau) \in \Gamma &&
-	\tau \neq (x,\tref{v}{b}{e})
-}{
-	\hastype{\Gamma}{x}{\tau}
-}[\rtvar]
-$$
-$$
-\inference{
-}{
-	\hastype{\Gamma}{w}{\ty{w}}
-}[\rtconst]
-\qquad
-\inference{
-	\hastype{\Gamma}{e}{\tau'} &&
-	\issubtype{\Gamma}{\tau'}{\tau} &&
-	\iswellformed{\Gamma}{\tau} &&
-}{
-	\hastype{\Gamma}{e}{\tau}
-}[\rtsub]
-$$
-$$
-\inference{
-	\hastype{\Gamma, x\colon\tau_x}{e}{\tau} &&
-	\iswellformed{\Gamma}{\tau_x}
-}{
-	\hastype{\Gamma}{\efun{x}{e}}{(\tfun{x}{\tau_x}{\tau})}
-}[\rtfun]
-\qquad
-\inference{
-	\hastype{\Gamma}{e_1}{(\tfunref{x}{\tau_{x}}{\tau}{v}{e_v})} &&
-	\hastype{\Gamma}{e_2}{\tau_{x}}
-}{
-	\hastype{\Gamma}{\eapp{e_1}{e_2}}{\tau\sub{x}{e_2}}
-}[\rtapp]
-$$
-$$
-\inference{
-	\hastype{\Gamma}{e}{\tref{v}{T}{e_T}} && \iswellformed{\Gamma}{\tau}\\
-	\tforalli{T}. \left\lbrace
-	\begin{array}{ll}
- 	\ty{\dcti} = \overline{x\colon\tau_{\dcti}}\rightarrow \tref{v}{T}{e'_T} \qquad
- 	\theta = \sub{x}{y_i} \cr
-	\hastype{\Gamma, \overline{y_i\colon\theta\ \tau_{\dcti}}, 
-				x\colon \tref{v}{T}{e_T \land \theta e'_T}
-				}{e_i}{\tau}
-	\end{array} \right.
-}{
-	\hastype{\Gamma}{\ecase{e}{x}{\dcti}{\overline{y}_i}{e_i}}{\tau}
-}[\rtcase]
-$$
-
-%%Polymorphic data constructors
-%%$$
-%%\inference{
-%%	\hastype{\Gamma}{e}{\tconref{T}{\overline{\tau}}{v}{e_T}} \\
-%%	\forall i. \{ 
-%%		\ty{\dcti} = \overline{x\colon\tau_D}\rightarrow \tconref{T}{\overline{\alpha}}{v}{e'_T} \\
-%%		\theta_x = \sub{x}{y} && \theta_\alpha = \sub{\alpha}{\tau} && \theta = \theta_x\ \theta_\alpha\\
-%%		\qquad \hastype{\Gamma, \overline{y\colon\theta\ \tau_D}, 
-%%						x\colon \tconref{T}{\overline{\tau}}{v}{e_T \land \theta e'_T}
-%%						}{e_i}{\tau}
-%%				\}
-%%}{
-%%	\hastype{\Gamma}{\ecase{e}{x}{\dcti}{\overline{y}_i}{e_i}}{\tau}
-%%}[\rtcase]
-%%$$
-
-\hfill\mbox{\iswellformed{\Gamma}{\tau}}
-$$
-\inference{
-	\hastypebase{\erase{\Gamma}, v\colon b}{e}{\tbool}
-}{
-	\iswellformed{\Gamma}{\tref{v}{b}{e}}
-}[\rwbase]
-\qquad
-\inference{
-%%TFUNREF	\hastypebase{\erase{\Gamma}, v\colon b}{e}{\tbool} &&
-	\iswellformed{\Gamma}{\tau_x} &&
-	\iswellformed{\Gamma, x \colon \tau_x}{\tau}
-}{
-	\iswellformed{\Gamma}{\tfunref{x}{\tau_x}{\tau}{v}{e}}
-}[\rwfun]
-$$
-%%$$
-%%\inference{
-%%	\forall i . \iswellformed{\Gamma}{\tau_i} &&
-%%	\hastypebase{\erase{\Gamma}, v \colon \erase{\tconref{T}{\tau}{v}{e}}}{e}{\tbool}
-%%}{
-%%	\iswellformed{\Gamma}{\tconref{T}{\tau}{v}{e}}
-%%}[\rwcon]
-%%$$
-
-\hfill\mbox{\issubtype{\Gamma}{\tau}{\tau}}
-$$
-\inference{
-	\issubref{\Gamma, v:b}{e_1}{e_2}
-}{
-	\issubtype{\Gamma}{\tref{v}{b}{e_1}}{\tref{v}{b}{e_2}}
-}[\rsubbase]
-\qquad
-\inference{
-%% FUNREF	\issubref{\Gamma, v:\tfun{x}{\tau_x}{\tau}}{e_1}{e_2} \\
-	\issubtype{\Gamma}{\tau'_x}{\tau_x} &&
-	\issubtype{\Gamma, x \colon \tau'_x}{\tau}{\tau'}
-}{
-	\issubtype{\Gamma}{\tfunref{x}{\tau_x}{\tau}{v}{e_1}}{\tfunref{x}{\tau'_x}{\tau'}{v}{e_2}}
-}[\rsubfun]
-$$
-%%$$
-%%\inference{
-%%	\forall i. \issubtype{\Gamma}{\tau}{\tau'} &&
-%%	\issubref{\Gamma, v:\tcon{T}{\overline{\tau}}}{e}{e'}
-%%}{
-%%	\issubtype{\Gamma}
-%%		{\tconref{T}{\overline{\tau}}{v}{e}}
-%%		{\tconref{T}{\overline{\tau'}}{v}{e'}}
-%%}[\rsubcon]
-%%$$
-
-\hfill\mbox{\issubref{\Gamma}{e}{e}}
-$$
-\inference{
-	\forall \theta. \iswellformed{\Gamma}{\theta} \land
-	\generalconditionImpl{\theta\ e_1}{\theta\ e_2}
-}{
-	\issubref{\Gamma}{e_1}{e_2}
-}[\rimpl]
-$$
-
-\hfill\mbox{\iswellformed{}{\Gamma}}
-$$
-\inference{
-	\iswellformed{}{\Gamma} &&
-	\iswellformed{\Gamma}{\tau}
-}{
-	\iswellformed{}{x\colon\tau,\Gamma}
-}
-\qquad
-\inference{}{\iswellformed{}{\emptyset}}
-$$
-
-
-\hfill\mbox{\iswellformed{\Gamma}{\theta}}
-$$
-\inference{
-	\forall x \in \text{Dom}(\Gamma). 
-	\theta(x) \in \interp{\theta \ \Gamma(x)}
-}{
-	\iswellformed{\Gamma}{\theta}
-}
-$$
-
-
-\section*{Constants and Data Constructors}
+\subsection{Typing}
+\input{rules}
+\subsection{Constants and Data Constructors}
 \begin{definition}\label{def:constants}
-For each constant or data constructor $w$
+\crash is an untyped constant.
+
+For each constant or data constructor $w \neq \crash$
 
 \newcommand\const{\ensuremath{w}}
 \begin{enumerate}
 \item \hastype{\emptyset}{\const}{\ty{\const}} and \iswellformed{}{\ty{\const}}
-\item If $\ty{\const} = \tfun{x}{\tau_x}{\tau}$, then for each $v$ such that
-\hastype{\emptyset}{v}{\tau_x} $\interp{\const}(v)$ is defined and
-\hastype{}{\interp{\const}(v)}{\tau\sub{x}{v}}
-
-Also, for all $e\in\interp{\tau_x}$, we have $\eapp{\const}{e}\in\interp{\tau\sub{x}{e}}$
+\item If $\ty{\const} = \tfun{x}{\tau_x}{\tau}$, then for each $v$ 
+	$\interp{\const}(v)$ is defined and 
+	if \hastype{\emptyset}{v}{\tau_x} then
+	\hastype{}{\interp{\const}(v)}{\tau\sub{x}{v}},
+	otherwise  $\interp{\const}(v) = \crash$
+	
 
 \item If $\ty{\const} = \tref{v}{b}{e}$, 
-then \generalconditionInterp{\const}{e\sub{v}{\const}} and 
-$\forall \const'\ \const' \neq \const. \lnot (\generalconditionInterp{\const}{e\sub{v}{\const'}})$ 
+then 
+\validi{{e\sub{v}{\const}}} and 
+$\forall \const'\, \const' \neq \const. \lnot (\validi{e\sub{v}{\const'}})$ 
+%
+% \generalconditionInterp{\const}{e\sub{v}{\const}} and 
+% $\forall \const'\ \const' \neq \const. \lnot (\generalconditionInterp{\const}{e\sub{v}{\const'}})$ 
 \end{enumerate}
 Moreover, for any base type $b$, \eqb{b} is a constant and 
 \begin{itemize}
@@ -472,7 +277,7 @@ For each $T$ there are exactly $i_T$ constants with result type $\tref{v}{T}{e_T
 namely   $\dcti$, $\forall 1 \leq i \leq i_T$.
 \end{definition}
 
-\section*{Semantic Typing}
+\subsection{Semantic Typing}
 \begin{align*}
 \shastype{\Gamma}{e}{\tau} & \doteq
 	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \theta\ e \in \interp{\theta \ \tau}\\
@@ -480,6 +285,23 @@ namely   $\dcti$, $\forall 1 \leq i \leq i_T$.
 	\forall \theta . \iswellformed{\Gamma}{\theta} \Rightarrow \interp{\theta\ \tau_1} \subseteq \interp{\theta\ \tau_2}
 \end{align*}
 
+\begin{lemma}\label{lemma:sevals}
+If $e$ diverges and \hastypebase{\emptyset}{e}{\erase{\tau}} 
+then \shastype{\emptyset}{e}{\tau}
+\end{lemma}
+\showprooftodo{
+}
+
+
+\begin{lemma}\label{lemma:sevals}
+If \evals{e}{e'} and ${e'}\in{\interp{\tau}}$ 
+then ${e}\in{\interp{\tau}}$
+\end{lemma}
+\showprooftodo{
+	\begin{proof}
+	\input{proofs/sevals}
+	\end{proof}
+}
 
 \begin{lemma}.
 \begin{enumerate}
@@ -487,7 +309,7 @@ namely   $\dcti$, $\forall 1 \leq i \leq i_T$.
 \item If \hastype{\Gamma}{e}{\tau} then \shastype{\Gamma}{e}{\tau} 
 \end{enumerate}
 \end{lemma}
-{%\showproof{
+\showprooftodo{
 	\begin{proof}
 	\input{proofs/interp}
 	\end{proof}
@@ -532,26 +354,7 @@ If \iswellformed{}{\Gamma} and \hastype{\Gamma}{e}{\tau} then \iswellformed{\Gam
 	\end{proof}
 }
 
-\section*{Operational Semantic}
-
-$$
-\begin{array}{lllll}
-\eval{\eapp{e_1}{e_2}}{\eapp{e_1'}{e_2}} & \text{if } \eval{e_1}{e_1'}&\qquad\qquad&
-\eval{\eapp{\efun{x}{e}}{e_x}}{e\sub{x}{e_x}} &\\
-\eval{\eapp{c}{e}}{\eapp{c}{e'}} & \text{if } \eval{e}{e'} &\qquad\qquad&
-\eval{\eapp{c}{v}}{[|c|](v)} &
-\end{array}
-$$
-$$
-\begin{array}{rllll}
-\eval{\ecase{e}{x}{\dcti}{\overline{y}}{e_i}&}
-	 {&\ecase{e'}{x}{\dcti}{\overline{y}}{e_i}} & \text{if } \eval{e}{e'} &\\
-\eval	{\ecase{\eapp{\dct{j}}{\overline{e'}}}{x}{\dcti}{\overline{y}}{e_i}&}
-		{&e_j\sub{y_l}{e'_l}\sub{x}{\eapp{\dct{j}}{\overline{e'}}}} &
-\end{array}
-$$
-
-\section*{Soundness}
+\subsection{Soundness}
 \begin{lemma}\label{lemma:eval}
 If \eval{e}{e'} then \issubtype{\Gamma}{\tau\sub{x}{e'}}{\tau\sub{x}{e}}.
 \end{lemma}
@@ -578,33 +381,111 @@ If \hastype{\emptyset}{e}{\tau} and $e \neq v$ then there exists an $e'$ such th
 	\end{proof}
 }
 
-\section*{Interpretations}
+\renewcommand{\isDecidable}{true} % true or false
+
+\section{Decidable System}
+\subsection*{Typing}
+\input{rules}
+
+\subsection{Interpretations}
 \begin{align*}
-\fin{e} \doteq \exists v. \evals{e}{v}\\
 \valid{e} \Leftrightarrow \evals{e}{v}\Rightarrow\evals{e}{\etrue}
 \end{align*}
 
+\subsection{Constants}
+
+Now, we should prove that each constant we define respects 
+the definition of constants.
+
+\paragraph{Note} that 
+if $\valid{e} \Leftrightarrow \etrue$
+then each $\hastype{\emptyset}{v}{\tref{v}{b}{\efalse}}$
+so @error :: {v: b | false } -> T@ should be defined for each value.
+
+With the above definition for \validi{\star} we can show 
+that there is no value $v$ such that \hastype{\Gamma}{v}{\tref{v}{b}{\efalse}}
+
+\newcommand\prop{\ensuremath{\mathtt{prop}}}
+\begin{itemize}
+\item 
+\begin{verbatim}
+prop :: Bool -> bool
+prop(True) = true
+prop(False) = false
+\end{verbatim}
+
+\item 
+\begin{verbatim}
+<=> :: bool -> bool -> bool
+true  <=> true  = true
+false <=> false = true
+true  <=> false = false
+false <=> true  = false
+\end{verbatim}
+
+\item $\texttt{Bool}\in T$, $i_\texttt{Bool} = 2$
+\item $\texttt{True}  \equiv D^{\texttt{Bool}}_1, \texttt{False} \equiv D^{\texttt{Bool}}_2$
+\item $\ty{\texttt{True}} = \tref{v}{\texttt{Bool}}{\prop\ v \Leftrightarrow \etrue}$, and
+$\ty{\texttt{False}} = \tref{v}{\texttt{Bool}}{\prop\ v \Leftrightarrow \efalse}$
+
+\item 
+\begin{verbatim}
+error :: {v:b | false} -> T
+error _ = crash
+\end{verbatim}
+
+Valid as $\evals{e}{v} \Rightarrow e \notin \interp{\tref{v}{b}{\efalse}}$
+
+\item 
 \begin{align*}
-\interp{x}&=x &&&
-\interp{\efun{x}{e}}&=f\\
-\interp{c}&=c &&&
-\interp{\eapp{e_1}{e_2}}&=\interp{e_1}(\interp{e_2})\\
+\efix{\tau} & : (\tau\rightarrow\tau) \rightarrow \tau\\
+\efix{\tau} f &=\eapp{f}{(\eapp{\efix{\tau}}{f})}
+\end{align*}
+{% \showproof{
+\input{proofs/fix}
+}
+\end{itemize}
+
+\subsection{Logic}
+\begin{align*}
+\mathcal{C}_0 &= \{ \etrue, \efalse, 0, 1, \dots \} \\
+\mathcal{C}_i &= \{ f, +, -, = , >, \lnot, \land, \dots \}
 \end{align*}
 
-
-
-\begin{claim}
+\hfill\mbox{\ispure{\Gamma}{e}}
 $$
-\left\lbrace	
-	\bigwedge_{(x,\tref{b}{v}{e})\in\Gamma}(\fin{x}\Rightarrow \interp{e\sub{v}{x}})
-	\Rightarrow \interp{e_1}
-	\Rightarrow \interp{e_2}
-\right\rbrace
-\Rightarrow
-\left\lbrace	
-\issubref{\Gamma}{e_1}{e_2}
-\right\rbrace
+\inference{
+	(x,b) \in \Gamma
+}{
+	\ispure{\Gamma}{x}
+}
+\qquad
+\inference{
+	c_n \in \mathcal{C}_n &&
+	\forall i. 1 \leq i \leq n \Rightarrow \ispure{\Gamma}{e_i}
+}{
+	\ispure{\Gamma}{c_n\ e_1\ \dots e_n}
+}
 $$
-\end{claim}
 
+%%\begin{align*}
+%%\interp{x}&=x &&&
+%%\interp{\efun{x}{e}}&=f\\
+%%\interp{c}&=c &&&
+%%\interp{\eapp{e_1}{e_2}}&=\interp{e_1}(\interp{e_2})\\
+%%\end{align*}
+%%
+%%\begin{claim}
+%%$$
+%%\left\lbrace	
+%%	\bigwedge_{(x,\tref{b}{v}{e})\in\Gamma}(\fin{x}\Rightarrow \interp{e\sub{v}{x}})
+%%	\Rightarrow \interp{e_1}
+%%	\Rightarrow \interp{e_2}
+%%\right\rbrace
+%%\Rightarrow
+%%\left\lbrace	
+%%\issubref{\Gamma}{e_1}{e_2}
+%%\right\rbrace
+%%$$
+%%\end{claim}
 \end{document}

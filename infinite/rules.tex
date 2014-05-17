@@ -8,13 +8,14 @@
 %\rtapp
 %\rtcase
 %\rtlet
+\restrictdecidable{}{
 $$
 \inference{
 	\hastype{\Gamma}{e}{\tref{v}{b}{e'}}
 }{
 	\hastype{\Gamma}{e}{\tref{v}{b}{v \eqb{b} e}}
 }[\rtexact]
-$$
+$$}
 $$
 \inference{
 	(x,\tref{v}{b}{e}) \in \Gamma
@@ -53,9 +54,9 @@ $$
 \qquad
 \inference{
 	\hastype{\Gamma}{e_1}{(\tfunref{x}{\tau_{x}}{\tau}{v}{e_v})} &&
-	\hastype{\Gamma}{e_2}{\tau_{x}}
+	\hastype{\Gamma}{\restrictdecidable{y}{e_2}}{\tau_{x}}
 }{
-	\hastype{\Gamma}{\eapp{e_1}{e_2}}{\tau\sub{x}{e_2}}
+	\hastype{\Gamma}{\eapp{e_1}{\restrictdecidable{y}{e_2}}}{\tau\sub{x}{\restrictdecidable{y}{e_2}}}
 }[\rtapp]
 $$
 $$
@@ -86,13 +87,13 @@ $$
 \hfill\mbox{\iswellformed{\Gamma}{\tau}}
 $$
 \inference{
-	\hastypebase{\erase{\Gamma}, v\colon b}{e}{\tbool}
+	\hastypebase{\erase{\Gamma}, v\colon b}{e}{\tbool} &&
+	\restrictdecidable{\ispure{\erase{\Gamma},v\colon b}{e}}{}
 }{
 	\iswellformed{\Gamma}{\tref{v}{b}{e}}
 }[\rwbase]
 \qquad
 \inference{
-%%TFUNREF	\hastypebase{\erase{\Gamma}, v\colon b}{e}{\tbool} &&
 	\iswellformed{\Gamma}{\tau_x} &&
 	\iswellformed{\Gamma, x \colon \tau_x}{\tau}
 }{
